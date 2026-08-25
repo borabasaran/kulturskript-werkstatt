@@ -149,6 +149,29 @@ textarea{width:100%;background:var(--surface);border:1px solid var(--line-strong
   padding:9px 11px;font-size:13.5px;line-height:1.5;resize:vertical;min-height:88px}
 .meter{display:flex;justify-content:space-between;align-items:center;margin-top:6px;font-size:11.5px;color:var(--faint);font-variant-numeric:tabular-nums}
 .meter.ok{color:var(--sage)}
+.need{margin-top:7px;font-size:12px;color:var(--amber);line-height:1.45}
+.need.done{color:var(--sage)}
+.need b{font-weight:600}
+
+/* ---- how-it-works ---- */
+details.how{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+  box-shadow:var(--shadow);margin-top:16px;padding:0}
+details.how summary{cursor:pointer;padding:12px 16px;font-family:Newsreader,Georgia,serif;
+  font-size:17px;font-weight:600;list-style:none}
+details.how summary::-webkit-details-marker{display:none}
+details.how summary::before{content:"\25B8";display:inline-block;margin-right:9px;color:var(--accent);
+  transition:transform .15s}
+details.how[open] summary::before{transform:rotate(90deg)}
+.howbody{padding:0 16px 16px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:20px}
+@media (max-width:820px){.howbody{grid-template-columns:1fr}}
+.howbody ol{margin:0;padding-left:20px;font-size:13.5px;line-height:1.65}
+.howbody ol li{margin-bottom:5px}
+.exrow{border-left:3px solid var(--line-strong);padding:7px 0 7px 11px;margin-top:9px;font-size:13.5px}
+.exrow.weak{border-left-color:var(--amber)}
+.exrow.strong{border-left-color:var(--sage)}
+.exrow .tag{font-size:10.5px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;display:block;margin-bottom:3px}
+.exrow.weak .tag{color:var(--amber)} .exrow.strong .tag{color:var(--sage)}
+.why{font-size:12.5px;color:var(--muted);margin:11px 0 0}
 
 /* ---- dialogue strip ---- */
 .strip{margin-top:18px}
@@ -231,6 +254,20 @@ footer{margin-top:26px;padding-top:14px;border-top:1px solid var(--line);font-si
     <div><b>Prototyp.</b> <span id="notice-txt">Die Rückmeldungsebene ist hier regelbasiert nachgebildet (Wizard-of-Oz): Sie folgt exakt dem Prompt-Vertrag der Studie — kein Urteil, ein Beleg, eine Frage — ruft aber kein Sprachmodell auf. Alle Exzerpte sind vollständige Originalpassagen aus den vier Quelldokumenten. Eigene Passagen lassen sich unter <b>Materialien</b> laden.</span></div>
   </div>
 
+  <details class="how" id="how">
+    <summary id="how-h">Wie diese Werkstatt funktioniert</summary>
+    <div class="howbody">
+      <div><ol id="how-steps"></ol></div>
+      <div>
+        <span class="lab" id="how-span-l">Beispiel · markierte Stelle</span>
+        <div class="selbox" id="how-span" style="margin-top:6px"></div>
+        <div class="exrow weak"><span class="tag" id="how-weak-l"></span><span id="how-weak"></span></div>
+        <div class="exrow strong"><span class="tag" id="how-strong-l"></span><span id="how-strong"></span></div>
+        <p class="why" id="how-why"></p>
+      </div>
+    </div>
+  </details>
+
   <!-- ================= WORK ================= -->
   <section id="p-work">
     <div class="work">
@@ -272,6 +309,7 @@ footer{margin-top:26px;padding-top:14px;border-top:1px solid var(--line);font-si
           <p class="q" id="just-q"></p>
           <textarea id="just" placeholder=""></textarea>
           <div class="meter" id="meter"><span id="meter-txt"></span><span id="meter-n">0</span></div>
+          <div class="need" id="need"></div>
           <div style="display:flex;gap:8px;margin-top:11px;flex-wrap:wrap">
             <button class="btn primary" id="save" disabled>Speichern</button>
             <button class="btn" id="ask">Rückfrage</button>
@@ -330,7 +368,7 @@ footer{margin-top:26px;padding-top:14px;border-top:1px solid var(--line);font-si
       <div class="stats" id="stats"></div>
       <div class="tablewrap"><table><thead><tr id="log-head"></tr></thead><tbody id="log-body"></tbody></table></div>
       <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap">
-        <button class="btn" id="export">Protokoll exportieren</button>
+        <button class="btn primary" id="export">Meine Arbeit herunterladen</button>
         <button class="btn ghost" id="clearall">Sitzung löschen</button>
         <span id="export-msg" style="font-size:12px;color:var(--muted);align-self:center"></span>
       </div>
@@ -355,9 +393,22 @@ const S = {
   lText:"Text", lLens:"Linsen", lSel:"Markierte Stelle", lDlg:"Rückmeldung",
   selEmpty:"Markiere zuerst eine Stelle im Text.",
   hint:"Markiere mit der Maus eine Stelle im Text — ein Satzteil genügt. Beantworte dann die drei Fragen und begründe deine Lesart am Wortlaut.",
-  justH:"Begründung", justQ:"Woran im Wortlaut machst du deine Lesart fest?",
+  justH:"Begründung", justQ:"Schreib, warum genau die Wörter, die du markiert hast, dich zu dieser Lesart führen — nicht was dort steht, sondern was diese Formulierung tut.",
   justPh:"Weil der Text an dieser Stelle …",
   meter:"mindestens 80 Zeichen", save:"Speichern", ask:"Rückfrage", reset:"Zurücksetzen",
+  howH:"Wie diese Werkstatt funktioniert",
+  howSteps:["Wähle oben eine Passage und markiere darin mit der Maus eine Stelle — ein Satzteil genügt.",
+            "Beantworte die drei Fragen rechts. Es gibt keine versteckte Musterlösung.",
+            "Begründe deine Lesart am Wortlaut: Warum führen genau diese Wörter dich dorthin?",
+            "Speichern. Die Rückmeldung gibt dir keine Antwort, sondern eine Frage — überarbeite und speichere erneut.",
+            "Zum Schluss: „Meine Arbeit herunterladen“ und die Datei mitschicken."],
+  howSpanL:"Beispiel · markierte Stelle",
+  howSpan:"Familie ist dort, wo Menschen langfristig Verantwortung füreinander übernehmen",
+  howWeakL:"zu wenig", howWeak:"Ich finde, hier geht es um moderne Familien und darum, dass sich vieles verändert hat.",
+  howStrongL:"so ist es gemeint", howStrong:"Der Text bindet Familie an „Verantwortung füreinander“ und nicht an Ehe oder Verwandtschaft. Damit wird die Beziehung zum Maßstab gemacht, nicht die Form des Zusammenlebens.",
+  howWhy:"Der Unterschied: die zweite Fassung nennt das Wort, an dem sie hängt, und sagt, was dieses Wort tut.",
+  needPre:"Zum Speichern fehlt noch:", needOk:"Alles da — du kannst speichern.",
+  needSpan:"eine markierte Stelle im Text", needLens:"eine Antwort auf Frage {n}", needChars:"noch {n} Zeichen Begründung",
   stateNew:"neu", stateSaved:"gespeichert", stateRev:"Fassung",
   dlgEmpty:"Noch keine Rückmeldung. Speichere eine Annotation oder stelle eine Rückfrage.",
   types:{evidence:"Beleg gesucht",contrast:"Kontrast",reframe:"Neu gerahmt",ack:"Weitergefragt",learner:"Du"},
@@ -369,8 +420,8 @@ const S = {
   logH:"Protokoll", logSub:"Jede Annotation, jede Überarbeitung und jede Rückmeldung wird hier festgehalten — die Datengrundlage der Evaluation.",
   head:["Zeit","Exzerpt","Ereignis","Linsen","Zeichen"],
   stats:["Annotationen","Überarbeitungen","Rückmeldungen","Exzerpte"],
-  export:"Protokoll exportieren", clear:"Sitzung löschen",
-  exported:"Protokoll gespeichert.", copied:"In die Zwischenablage kopiert.",
+  export:"Meine Arbeit herunterladen", clear:"Sitzung löschen",
+  exported:"Datei gespeichert — bitte der E-Mail beilegen.", copied:"In die Zwischenablage kopiert.",
   demo:"gekürzt",
   foot:"Kulturskript-Werkstatt · Prototyp zur Studie „Family as Cultural Script in the Digital Classroom“ · Anadolu Üniversitesi, BAP SÇB-2026-3204. Ländernamen sind Metadaten des Textes, keine Aussage über Menschen.",
   lenses:[
@@ -397,9 +448,22 @@ const S = {
   lText:"Metin", lLens:"Mercekler", lSel:"Seçili yer", lDlg:"Geri bildirim",
   selEmpty:"Önce metinde bir yer seçin.",
   hint:"Metinde fareyle bir yer seçin — bir cümle parçası yeter. Sonra üç soruyu yanıtlayın ve okumanızı metnin sözcüklerine dayandırın.",
-  justH:"Gerekçe", justQ:"Okumanızı metnin hangi sözcüklerine dayandırıyorsunuz?",
+  justH:"Gerekçe", justQ:"Seçtiğiniz sözcüklerin sizi neden bu okumaya götürdüğünü yazın — metinde ne yazdığını değil, o ifadenin ne yaptığını.",
   justPh:"Çünkü metin burada …",
   meter:"en az 80 karakter", save:"Kaydet", ask:"Soru sor", reset:"Temizle",
+  howH:"Bu atölye nasıl çalışıyor",
+  howSteps:["Yukarıdan bir pasaj seçin ve içinde fareyle bir yer işaretleyin — bir cümle parçası yeter.",
+            "Sağdaki üç soruyu yanıtlayın. Gizli bir doğru cevap yok.",
+            "Okumanızı metnin sözcüklerine dayandırın: tam olarak bu sözcükler sizi neden oraya götürüyor?",
+            "Kaydedin. Geri bildirim size cevap değil soru verir — düzeltip yeniden kaydedin.",
+            "En sonda „Çalışmamı indir“ deyip çıkan dosyayı da gönderin."],
+  howSpanL:"Örnek · seçili yer",
+  howSpan:"Familie ist dort, wo Menschen langfristig Verantwortung füreinander übernehmen",
+  howWeakL:"yetersiz", howWeak:"Bence burada modern ailelerden ve pek çok şeyin değiştiğinden söz ediliyor.",
+  howStrongL:"beklenen", howStrong:"Metin aileyi evliliğe ya da akrabalığa değil, „Verantwortung füreinander“ ifadesine bağlıyor. Böylece ölçüt birlikte yaşama biçimi değil, ilişkinin kendisi oluyor.",
+  howWhy:"Fark şu: ikinci gerekçe dayandığı sözcüğü söylüyor ve o sözcüğün ne yaptığını anlatıyor.",
+  needPre:"Kaydetmek için eksik:", needOk:"Her şey tamam — kaydedebilirsiniz.",
+  needSpan:"metinde seçili bir yer", needLens:"{n}. sorunun yanıtı", needChars:"{n} karakter daha gerekçe",
   stateNew:"yeni", stateSaved:"kaydedildi", stateRev:"sürüm",
   dlgEmpty:"Henüz geri bildirim yok. Bir açıklama kaydedin ya da soru sorun.",
   types:{evidence:"Kanıt istendi",contrast:"Karşıtlık",reframe:"Yeniden çerçeveleme",ack:"Derinleştirme",learner:"Siz"},
@@ -411,8 +475,8 @@ const S = {
   logH:"Kayıt", logSub:"Her açıklama, her revizyon ve her geri bildirim burada tutulur — değerlendirmenin veri tabanı.",
   head:["Zaman","Alıntı","Olay","Mercekler","Karakter"],
   stats:["Açıklama","Revizyon","Geri bildirim","Alıntı"],
-  export:"Kaydı dışa aktar", clear:"Oturumu sil",
-  exported:"Kayıt kaydedildi.", copied:"Panoya kopyalandı.",
+  export:"Çalışmamı indir", clear:"Oturumu sil",
+  exported:"Dosya indirildi — lütfen e-postaya ekleyin.", copied:"Panoya kopyalandı.",
   demo:"kısaltılmış",
   foot:"Kulturskript-Werkstatt · „Family as Cultural Script in the Digital Classroom“ çalışmasının prototipi · Anadolu Üniversitesi, BAP SÇB-2026-3204. Ülke adları metnin künyesidir, insanlar hakkında bir yargı değildir.",
   lenses:[
@@ -439,9 +503,22 @@ const S = {
   lText:"Text", lLens:"Lenses", lSel:"Selected passage", lDlg:"Feedback",
   selEmpty:"Select a stretch of the text first.",
   hint:"Select a stretch of text with the mouse — a clause is enough. Then answer the three questions and anchor your reading in the wording.",
-  justH:"Justification", justQ:"What in the wording anchors your reading?",
+  justH:"Justification", justQ:"Write why the words you selected lead you to this reading — not what the text says, but what that wording does.",
   justPh:"Because the text here …",
   meter:"at least 80 characters", save:"Save", ask:"Ask", reset:"Clear",
+  howH:"How this workshop works",
+  howSteps:["Pick a passage above and select a stretch of it with the mouse — a clause is enough.",
+            "Answer the three questions on the right. There is no hidden model answer.",
+            "Anchor your reading in the wording: why do these particular words lead you there?",
+            "Save. The response gives you a question, not an answer — revise and save again.",
+            "At the end: “Download my work” and send the file along."],
+  howSpanL:"Example · selected passage",
+  howSpan:"Familie ist dort, wo Menschen langfristig Verantwortung füreinander übernehmen",
+  howWeakL:"too thin", howWeak:"I think this is about modern families and about how much has changed.",
+  howStrongL:"what is meant", howStrong:"The text ties family to “Verantwortung füreinander” rather than to marriage or kinship. The measure becomes the relationship itself, not the form of living together.",
+  howWhy:"The difference: the second version names the word it hangs on, and says what that word does.",
+  needPre:"Still needed to save:", needOk:"All set — you can save.",
+  needSpan:"a selected stretch of text", needLens:"an answer to question {n}", needChars:"{n} more characters of justification",
   stateNew:"new", stateSaved:"saved", stateRev:"version",
   dlgEmpty:"No feedback yet. Save an annotation or ask a question.",
   types:{evidence:"Evidence requested",contrast:"Contrast",reframe:"Reframed",ack:"Pressed further",learner:"You"},
@@ -453,8 +530,8 @@ const S = {
   logH:"Log", logSub:"Every annotation, revision and response is recorded here — the data behind the evaluation.",
   head:["Time","Excerpt","Event","Lenses","Characters"],
   stats:["Annotations","Revisions","Responses","Excerpts"],
-  export:"Export log", clear:"Clear session",
-  exported:"Log saved.", copied:"Copied to clipboard.",
+  export:"Download my work", clear:"Clear session",
+  exported:"File saved — please attach it to your e-mail.", copied:"Copied to clipboard.",
   demo:"abridged",
   foot:"Kulturskript-Werkstatt · Prototype for the study “Family as Cultural Script in the Digital Classroom” · Anadolu University, BAP SÇB-2026-3204. Country names are metadata of the text, not a claim about people.",
   lenses:[
@@ -527,7 +604,6 @@ function cur(){return state.excerpts.find(x=>x.id===state.current)||state.excerp
    always anchored to the selected span.
 ---------------------------------------------------------------- */
 const ESSENTIALISE=/\b(die\s+)?(deutschen|türken|schweizer|österreicher|almanlar|türkler|isviçreliler|avusturyalılar|germans|turks|austrians|the\s+swiss)\b|\b(alle|immer|nie|typisch|jeder)\b|\b(hepsi|herkes|hep|asla|tipik)\b|\b(always|never|typical|everyone)\b/i;
-
 /* v2 triggers. A verdict on the polity is not a reading of the text; and a
    quotation that adds no words of the learner's own is not an interpretation. */
 const EVALUATIVE=/(?:^|[^\p{L}])(rückständig|fortschrittlich|besser|schlechter|primitiv|vorbildlich|engstirnig|aufgeklärt|zurückgeblieben|geri kalmış|ileri)\p{L}*/iu;
@@ -618,6 +694,15 @@ function renderChrome(){
   document.getElementById("clearall").textContent=s.clear;
   document.getElementById("foot").textContent=s.foot;
   document.getElementById("log-head").innerHTML=s.head.map(h=>`<th>${h}</th>`).join("");
+  document.getElementById("how-h").textContent=s.howH;
+  document.getElementById("how-steps").innerHTML=s.howSteps.map(x=>`<li>${escapeHtml(x)}</li>`).join("");
+  document.getElementById("how-span-l").textContent=s.howSpanL;
+  document.getElementById("how-span").textContent=s.howSpan;
+  document.getElementById("how-weak-l").textContent=s.howWeakL;
+  document.getElementById("how-weak").textContent=s.howWeak;
+  document.getElementById("how-strong-l").textContent=s.howStrongL;
+  document.getElementById("how-strong").textContent=s.howStrong;
+  document.getElementById("how-why").textContent=s.howWhy;
 }
 
 function renderLenses(){
@@ -727,11 +812,24 @@ function escapeHtml(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"
    Interaction
 ---------------------------------------------------------------- */
 function checkSave(){
+  const s=t();
   const j=document.getElementById("just").value.trim();
   const n=j.length;
   document.getElementById("meter-n").textContent=n;
   document.getElementById("meter").classList.toggle("ok",n>=80);
-  document.getElementById("save").disabled=!(draft.span&&draft.l1&&draft.l2&&draft.l3&&n>=80);
+  const missing=[];
+  if(!draft.span) missing.push(s.needSpan);
+  [1,2,3].forEach(i=>{ if(!draft["l"+i]) missing.push(s.needLens.replace("{n}",i)); });
+  if(n<80) missing.push(s.needChars.replace("{n}",80-n));
+  const need=document.getElementById("need");
+  if(missing.length){
+    need.className="need";
+    need.innerHTML="<b>"+escapeHtml(s.needPre)+"</b> "+missing.map(escapeHtml).join(" · ");
+  }else{
+    need.className="need done";
+    need.textContent=s.needOk;
+  }
+  document.getElementById("save").disabled=missing.length>0;
 }
 function resetDraft(){
   draft={span:"",l1:null,l2:null,l3:null};
@@ -740,14 +838,16 @@ function resetDraft(){
   renderLenses(); checkSave();
 }
 
-document.getElementById("excerpt").addEventListener("mouseup",()=>{
+function captureSelection(){
   const sel=String(window.getSelection());
   if(sel.trim().length>3){
-    draft.span=sel.trim();
+    draft.span=sel.trim().replace(/\s+/g," ");
     const sb=document.getElementById("selbox"); sb.className="selbox"; sb.textContent=draft.span;
     checkSave();
   }
-});
+}
+["mouseup","touchend","keyup"].forEach(ev=>
+  document.getElementById("excerpt").addEventListener(ev,captureSelection));
 
 document.getElementById("just").addEventListener("input",checkSave);
 
@@ -782,11 +882,24 @@ document.getElementById("clearall").addEventListener("click",()=>{
 });
 
 document.getElementById("export").addEventListener("click",async()=>{
-  const payload=JSON.stringify({annotations:state.ann,log:state.log,turns:state.turns},null,2);
+  const payload=JSON.stringify({
+    version:"kulturskript-werkstatt v3",
+    language:lang,
+    annotations:state.ann, log:state.log, turns:state.turns
+  },null,2);
   const msg=document.getElementById("export-msg");
+  const name="kulturskript-arbeit.json";
   try{
     const d=await window.claude?.use?.("downloads");
-    if(d){ await d.save({filename:"kulturskript-protokoll.json",data:payload}); msg.textContent=t().exported; return; }
+    if(d){ await d.save({filename:name,data:payload}); msg.textContent=t().exported; return; }
+  }catch(e){}
+  try{
+    const blob=new Blob([payload],{type:"application/json"});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");
+    a.href=url; a.download=name; document.body.appendChild(a); a.click();
+    document.body.removeChild(a); setTimeout(()=>URL.revokeObjectURL(url),2000);
+    msg.textContent=t().exported; return;
   }catch(e){}
   try{ await navigator.clipboard.writeText(payload); msg.textContent=t().copied; }
   catch(e){ msg.textContent="—"; }
@@ -813,6 +926,8 @@ function setLang(l){
 
 /* boot */
 load();
+try{ if(!localStorage.getItem("kw.seen.how")){ document.getElementById("how").open=true;
+     localStorage.setItem("kw.seen.how","1"); } }catch(e){ document.getElementById("how").open=true; }
 renderChrome(); renderLenses(); renderPicker(); renderDoc(); resetDraft();
 renderTurns(); renderMat(); renderLog(); renderCmp(); renderCounts();
 </script>
