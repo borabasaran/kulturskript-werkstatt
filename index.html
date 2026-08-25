@@ -173,6 +173,22 @@ details.how[open] summary::before{transform:rotate(90deg)}
 .exrow.weak .tag{color:var(--amber)} .exrow.strong .tag{color:var(--sage)}
 .why{font-size:12.5px;color:var(--muted);margin:11px 0 0}
 
+/* ---- guided run ---- */
+.guide{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--accent);
+  border-radius:var(--r);box-shadow:var(--shadow);margin-top:16px;padding:13px 16px;
+  display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:center}
+@media (max-width:720px){.guide{grid-template-columns:1fr}}
+.guide .step{font-size:10.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--accent)}
+.guide h4{margin:3px 0 3px;font-family:Newsreader,Georgia,serif;font-size:17px;font-weight:600}
+.guide p{margin:0;font-size:13px;color:var(--muted);line-height:1.5}
+.guide.done{border-left-color:var(--sage)}
+.guide.done .step{color:var(--sage)}
+.dots{display:flex;gap:5px;align-items:center}
+.dots i{width:9px;height:9px;border-radius:50%;background:var(--line-strong);display:block}
+.dots i.ok{background:var(--sage)}
+.dots i.now{background:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.gactions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
 /* ---- evaluation ---- */
 .evgroup{margin-top:22px}
 .evgroup h3{font-family:Newsreader,Georgia,serif;font-size:17px;font-weight:600;margin:0 0 2px}
@@ -217,7 +233,7 @@ details.how[open] summary::before{transform:rotate(90deg)}
 .cmp-col h4{margin:0 0 8px;font-family:Newsreader,Georgia,serif;font-size:17px;font-weight:600}
 .readrow{display:grid;grid-template-columns:26px 1fr;gap:9px;padding:8px 0;border-top:1px solid var(--line);font-size:13.5px}
 .readrow .k{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--faint)}
-.locked{text-align:center;padding:40px 20px;color:var(--muted);font-size:13.5px}
+.locked{text-align:center;padding:40px 20px;color:var(--muted);font-size:13.5px;line-height:1.6}
 
 /* ---- materials ---- */
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -275,6 +291,18 @@ footer{margin-top:26px;padding-top:14px;border-top:1px solid var(--line);font-si
 
   <div class="notice">
     <div><b>Prototyp.</b> <span id="notice-txt">Die Rückmeldungsebene ist hier regelbasiert nachgebildet (Wizard-of-Oz): Sie folgt exakt dem Prompt-Vertrag der Studie — kein Urteil, ein Beleg, eine Frage — ruft aber kein Sprachmodell auf. Alle Exzerpte sind vollständige Originalpassagen aus den vier Quelldokumenten. Eigene Passagen lassen sich unter <b>Materialien</b> laden.</span></div>
+  </div>
+
+  <div class="guide" id="guide">
+    <div>
+      <div class="step" id="g-step"></div>
+      <h4 id="g-title"></h4>
+      <p id="g-text"></p>
+    </div>
+    <div class="gactions">
+      <div class="dots" id="g-dots"></div>
+      <button class="btn" id="g-go"></button>
+    </div>
   </div>
 
   <details class="how" id="how">
@@ -437,6 +465,17 @@ const S = {
   justH:"Begründung", justQ:"Schreib, warum genau die Wörter, die du markiert hast, dich zu dieser Lesart führen — nicht was dort steht, sondern was diese Formulierung tut.",
   justPh:"Weil der Text an dieser Stelle …",
   meter:"mindestens 80 Zeichen", save:"Speichern", ask:"Rückfrage", reset:"Zurücksetzen",
+  gStep:"Schritt {n} von {total}", gDone:"Fertig", gGo:"Dorthin",
+  gFinishT:"Alles erledigt — vielen Dank.",
+  gFinishX:"Lade jetzt deine Arbeit herunter und schicke die Datei mit. Sie enthält deine Annotationen und deine Bewertung.",
+  gSteps:[
+   ["Eine Stelle annotieren","Wähle eine Passage, markiere darin eine Stelle, beantworte die drei Fragen und begründe deine Lesart. Dann speichern."],
+   ["Die Begründung überarbeiten","Lies die Rückmeldung und schreibe die Begründung neu — diesmal am Wortlaut der markierten Stelle. Erneut speichern."],
+   ["Eine Verallgemeinerung ausprobieren","Schreibe absichtlich einen Satz, der vom Text auf ein Volk schließt (z. B. „Die Türken denken immer so“) und speichere. Beobachte, was das System tut."],
+   ["Ein zweites Land annotieren","Wechsle oben zu einer Passage aus einem anderen Land und annotiere dort eine Stelle."],
+   ["Den Vergleich ansehen","Öffne den Reiter Vergleich — deine beiden Lesarten stehen jetzt nebeneinander."],
+   ["Den Bewertungsbogen ausfüllen","Öffne den Reiter Bewertung: 17 Skalenfragen und vier Lernersätze. Die offenen Fragen sind willkommen, aber nicht Pflicht."]
+  ],
   howH:"Wie diese Werkstatt funktioniert",
   howSteps:["Wähle oben eine Passage und markiere darin mit der Maus eine Stelle — ein Satzteil genügt.",
             "Beantworte die drei Fragen rechts. Es gibt keine versteckte Musterlösung.",
@@ -454,7 +493,8 @@ const S = {
   dlgEmpty:"Noch keine Rückmeldung. Speichere eine Annotation oder stelle eine Rückfrage.",
   types:{evidence:"Beleg gesucht",contrast:"Kontrast",reframe:"Neu gerahmt",ack:"Weitergefragt",learner:"Du"},
   cmpH:"Vergleich", cmpSub:"Der Vergleich öffnet sich, sobald du Passagen aus zwei Ländern annotiert hast — deine eigenen Lesarten stehen dann nebeneinander.",
-  cmpLocked:"Noch gesperrt. Annotiere je eine Passage aus zwei verschiedenen Texten.",
+  cmpLocked:"Noch gesperrt. Annotiere je eine Passage aus zwei verschiedenen Ländern.",
+  cmpLockedOne:"{done} hast du schon annotiert. Nimm jetzt eine Passage aus einem anderen Land: {rest}.",
   matH:"Materialien", matSub:"Lade hier die vollständigen Passagen aus deinem Korpus. Ein Exzerpt von 80–150 Wörtern arbeitet am besten.",
   mt:"Titel", mc:"Land", ms:"Quelle", mx:"Passage", mAdd:"Hinzufügen", mBank:"Exzerptbank",
   mtPh:"z. B. Kapitel 3, Absatz 2", msPh:"Herausgeber, Jahr, Seite", mxPh:"Passage im Original einfügen …",
@@ -492,6 +532,17 @@ const S = {
   justH:"Gerekçe", justQ:"Seçtiğiniz sözcüklerin sizi neden bu okumaya götürdüğünü yazın — metinde ne yazdığını değil, o ifadenin ne yaptığını.",
   justPh:"Çünkü metin burada …",
   meter:"en az 80 karakter", save:"Kaydet", ask:"Soru sor", reset:"Temizle",
+  gStep:"Adım {n} / {total}", gDone:"Tamamlandı", gGo:"Oraya git",
+  gFinishT:"Her şey tamam — teşekkür ederim.",
+  gFinishX:"Şimdi çalışmanızı indirip dosyayı gönderin. İçinde hem açıklamalarınız hem değerlendirmeniz var.",
+  gSteps:[
+   ["Bir yeri açıklayın","Bir pasaj seçin, içinde bir yer işaretleyin, üç soruyu yanıtlayın ve okumanızı gerekçelendirin. Sonra kaydedin."],
+   ["Gerekçeyi düzeltin","Gelen geri bildirimi okuyun ve gerekçeyi yeniden yazın — bu kez seçtiğiniz sözcüklere dayandırarak. Tekrar kaydedin."],
+   ["Bir genelleme deneyin","Bilerek metinden bir halka genelleme yapan bir cümle yazın (örn. „Türkler hep böyle düşünür“) ve kaydedin. Sistemin ne yaptığını gözleyin."],
+   ["İkinci bir ülkeyi açıklayın","Yukarıdan başka bir ülkenin pasajına geçin ve orada da bir yeri açıklayın."],
+   ["Karşılaştırmaya bakın","Karşılaştırma sekmesini açın — iki okumanız artık yan yana duruyor."],
+   ["Değerlendirme formunu doldurun","Değerlendirme sekmesini açın: 17 ölçekli madde ve dört öğrenci cümlesi. Açık uçlu sorular zorunlu değil ama çok işime yarar."]
+  ],
   howH:"Bu atölye nasıl çalışıyor",
   howSteps:["Yukarıdan bir pasaj seçin ve içinde fareyle bir yer işaretleyin — bir cümle parçası yeter.",
             "Sağdaki üç soruyu yanıtlayın. Gizli bir doğru cevap yok.",
@@ -509,7 +560,8 @@ const S = {
   dlgEmpty:"Henüz geri bildirim yok. Bir açıklama kaydedin ya da soru sorun.",
   types:{evidence:"Kanıt istendi",contrast:"Karşıtlık",reframe:"Yeniden çerçeveleme",ack:"Derinleştirme",learner:"Siz"},
   cmpH:"Karşılaştırma", cmpSub:"İki farklı ülkeden pasaj açıkladığınızda karşılaştırma açılır — kendi okumalarınız yan yana gelir.",
-  cmpLocked:"Henüz kilitli. İki farklı metinden birer pasaj açıklayın.",
+  cmpLocked:"Henüz kilitli. İki farklı ülkeden birer pasaj açıklayın.",
+  cmpLockedOne:"{done} pasajını açıkladınız. Şimdi başka bir ülkenin pasajını açıklayın: {rest}.",
   matH:"Materyaller", matSub:"Korpusunuzdaki tam pasajları buradan yükleyin. 80–150 kelimelik alıntılar en iyi sonucu verir.",
   mt:"Başlık", mc:"Ülke", ms:"Kaynak", mx:"Pasaj", mAdd:"Ekle", mBank:"Alıntı bankası",
   mtPh:"örn. Bölüm 3, paragraf 2", msPh:"Yayıncı, yıl, sayfa", mxPh:"Pasajı özgün dilinde yapıştırın …",
@@ -547,6 +599,17 @@ const S = {
   justH:"Justification", justQ:"Write why the words you selected lead you to this reading — not what the text says, but what that wording does.",
   justPh:"Because the text here …",
   meter:"at least 80 characters", save:"Save", ask:"Ask", reset:"Clear",
+  gStep:"Step {n} of {total}", gDone:"Done", gGo:"Go there",
+  gFinishT:"All done — thank you.",
+  gFinishX:"Now download your work and send the file along. It contains both your annotations and your ratings.",
+  gSteps:[
+   ["Annotate one passage","Pick a passage, select a stretch of it, answer the three questions and justify your reading. Then save."],
+   ["Revise the justification","Read the response and rewrite the justification — this time anchored in the words you selected. Save again."],
+   ["Try a generalisation","Deliberately write a sentence that generalises from the text to a people (e.g. \"Turks always think this way\") and save. Watch what the system does."],
+   ["Annotate a second country","Switch to a passage from another country above and annotate a stretch there."],
+   ["Look at the comparison","Open the Compare tab — your two readings now sit side by side."],
+   ["Fill in the evaluation","Open the Evaluation tab: 17 scale items and four learner sentences. The open questions are welcome but not required."]
+  ],
   howH:"How this workshop works",
   howSteps:["Pick a passage above and select a stretch of it with the mouse — a clause is enough.",
             "Answer the three questions on the right. There is no hidden model answer.",
@@ -564,7 +627,8 @@ const S = {
   dlgEmpty:"No feedback yet. Save an annotation or ask a question.",
   types:{evidence:"Evidence requested",contrast:"Contrast",reframe:"Reframed",ack:"Pressed further",learner:"You"},
   cmpH:"Compare", cmpSub:"Comparison unlocks once you have annotated passages from two countries — your own readings then sit side by side.",
-  cmpLocked:"Still locked. Annotate one passage from each of two different texts.",
+  cmpLocked:"Still locked. Annotate one passage from each of two different countries.",
+  cmpLockedOne:"You have annotated {done}. Now take a passage from another country: {rest}.",
   matH:"Materials", matSub:"Load the full passages from your corpus here. An excerpt of 80–150 words works best.",
   mt:"Title", mc:"Country", ms:"Source", mx:"Passage", mAdd:"Add", mBank:"Excerpt bank",
   mtPh:"e.g. Chapter 3, paragraph 2", msPh:"Publisher, year, page", mxPh:"Paste the passage in the original …",
@@ -629,11 +693,11 @@ const SEEDS = [
 ---------------------------------------------------------------- */
 const KEY="kw.session.v3";
 let lang="de";
-let state={excerpts:SEEDS.slice(),current:SEEDS[0].id,ann:{},log:[],turns:[],eval:{}};
+let state={excerpts:SEEDS.slice(),current:SEEDS[0].id,ann:{},log:[],turns:[],eval:{},flags:{}};
 let draft={span:"",l1:null,l2:null,l3:null};
 
 function load(){try{const r=localStorage.getItem(KEY);if(r){const p=JSON.parse(r);
-  if(p&&p.excerpts&&p.excerpts.length){state=p; if(!state.eval)state.eval={};}}}catch(e){}}
+  if(p&&p.excerpts&&p.excerpts.length){state=p; if(!state.eval)state.eval={}; if(!state.flags)state.flags={};}}}catch(e){}}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}}
 function t(){return S[lang];}
 function now(){const d=new Date();return d.toTimeString().slice(0,8);}
@@ -806,7 +870,14 @@ function renderCmp(){
   const s=t(), body=document.getElementById("cmp-body");
   const list=Object.entries(state.ann).map(([id,a])=>Object.assign({id},a));
   const countries=[...new Set(list.map(a=>a.country))];
-  if(countries.length<2){ body.innerHTML=`<div class="locked">${s.cmpLocked}</div>`; return; }
+  if(countries.length<2){
+    let msg=escapeHtml(s.cmpLocked);
+    if(countries.length===1){
+      const rest=[...new Set(state.excerpts.map(x=>x.country))].filter(c=>c!==countries[0]);
+      if(rest.length) msg+="<br><span style=\"color:var(--accent)\">"+
+        escapeHtml(s.cmpLockedOne.replace("{done}",countries[0]).replace("{rest}",rest.join(", ")))+"</span>";
+    }
+    body.innerHTML=`<div class="locked">${msg}</div>`; return; }
   const pick=countries.slice(0,2).map(cn=>list.filter(a=>a.country===cn).slice(-1)[0]);
   body.innerHTML=`<div class="cmp">`+pick.map(a=>{
     const rows=[0,1,2].map(i=>{
@@ -901,10 +972,10 @@ document.getElementById("save").addEventListener("click",()=>{
   push({role:"learner",text:j,ex:c.id});
   logEvent(prev?"revision":"annotation",{lenses:[draft.l1,draft.l2,draft.l3].join(""),chars:j.length});
   respond("save");
-  renderDoc(); renderPicker(); renderCounts(); renderCmp(); renderLog();
+  renderDoc(); renderPicker(); renderCounts(); renderCmp(); renderLog(); renderGuide();
 });
 
-document.getElementById("ask").addEventListener("click",()=>{ respond("ask"); logEvent("prompt-request",{}); });
+document.getElementById("ask").addEventListener("click",()=>{ respond("ask"); logEvent("prompt-request",{}); renderGuide(); });
 document.getElementById("reset").addEventListener("click",resetDraft);
 
 document.getElementById("m-add").addEventListener("click",()=>{
@@ -918,14 +989,15 @@ document.getElementById("m-add").addEventListener("click",()=>{
 });
 
 document.getElementById("clearall").addEventListener("click",()=>{
-  state={excerpts:SEEDS.slice(),current:SEEDS[0].id,ann:{},log:[],turns:[],eval:{}};
+  state={excerpts:SEEDS.slice(),current:SEEDS[0].id,ann:{},log:[],turns:[],eval:{},flags:{}};
   save(); resetDraft(); renderPicker(); renderDoc(); renderTurns(); renderMat(); renderLog(); renderCmp(); renderCounts();
 });
 
 async function downloadWork(msgId){
   const payload=JSON.stringify({
-    version:"kulturskript-werkstatt v4",
+    version:"kulturskript-werkstatt v5",
     language:lang,
+    guidedStepReached:(currentStep()<0?GUIDE_STEPS.length:currentStep()),
     evaluation:state.eval||{},
     annotations:state.ann, log:state.log, turns:state.turns
   },null,2);
@@ -1003,7 +1075,7 @@ function evAnswered(){
 }
 function evSet(code,val){
   if(!state.eval) state.eval={};
-  state.eval[code]=val; save(); renderEvCount();
+  state.eval[code]=val; save(); renderEvCount(); renderGuide();
 }
 function renderEvCount(){
   document.getElementById("ev-count").textContent=evAnswered()+"/"+evTotal();
@@ -1050,21 +1122,76 @@ function renderEv(){
   renderEvCount();
 }
 
+/* ---------------------------------------------------------------
+   Guided run. Six steps, each unlocked by a real condition in the
+   data — never by a "next" button. The step the reviewer is on is
+   recorded in the export, so a stall is itself a finding.
+---------------------------------------------------------------- */
+const GUIDE_STEPS=[
+ {tab:"work", done:()=>Object.keys(state.ann).length>=1},
+ {tab:"work", done:()=>Object.values(state.ann).some(a=>a.versions&&a.versions.length>=2)},
+ {tab:"work", done:()=>state.turns.some(x=>x.role==="system"&&x.type==="reframe")},
+ {tab:"work", done:()=>new Set(Object.values(state.ann).map(a=>a.country)).size>=2},
+ {tab:"cmp",  done:()=>!!(state.flags&&state.flags.sawCompare)},
+ {tab:"ev",   done:()=>{
+    const e=state.eval||{};
+    const lik=EV_GROUPS.reduce((n,g)=>n+g.items.filter(([c])=>String(e[c]||"").trim()!=="").length,0);
+    const sent=EV_SENT.filter(([c])=>String(e[c]||"").trim()!=="").length;
+    return lik>=17 && sent>=4;
+ }}
+];
+function currentStep(){
+  for(let i=0;i<GUIDE_STEPS.length;i++){ if(!GUIDE_STEPS[i].done()) return i; }
+  return -1;
+}
+function renderGuide(){
+  const s=t(), g=document.getElementById("guide"), i=currentStep();
+  const dots=GUIDE_STEPS.map((st,k)=>
+    `<i class="${st.done()?"ok":(k===i?"now":"")}"></i>`).join("");
+  document.getElementById("g-dots").innerHTML=dots;
+  const go=document.getElementById("g-go");
+  if(i<0){
+    g.className="guide done";
+    document.getElementById("g-step").textContent=s.gDone;
+    document.getElementById("g-title").textContent=s.gFinishT;
+    document.getElementById("g-text").textContent=s.gFinishX;
+    go.textContent=s.export;
+    go.onclick=()=>{ switchTab("log"); downloadWork("export-msg"); };
+  }else{
+    g.className="guide";
+    document.getElementById("g-step").textContent=
+      s.gStep.replace("{n}",i+1).replace("{total}",GUIDE_STEPS.length);
+    document.getElementById("g-title").textContent=s.gSteps[i][0];
+    document.getElementById("g-text").textContent=s.gSteps[i][1];
+    go.textContent=s.gGo;
+    go.onclick=()=>switchTab(GUIDE_STEPS[i].tab);
+  }
+}
+
 /* tabs */
 const panes={work:"p-work",cmp:"p-cmp",mat:"p-mat",log:"p-log",ev:"p-ev"};
-Object.keys(panes).forEach(k=>document.getElementById("tab-"+k).addEventListener("click",()=>{
+function switchTab(k){
   Object.keys(panes).forEach(j=>{
     document.getElementById("tab-"+j).setAttribute("aria-selected",String(j===k));
     document.getElementById(panes[j]).classList.toggle("hidden",j!==k);
   });
-  if(k==="cmp")renderCmp(); if(k==="mat")renderMat(); if(k==="log")renderLog(); if(k==="ev")renderEv();
-}));
+  if(k==="cmp"){
+    renderCmp();
+    const n=new Set(Object.values(state.ann).map(a=>a.country)).size;
+    if(n>=2 && !(state.flags&&state.flags.sawCompare)){
+      state.flags=state.flags||{}; state.flags.sawCompare=true; save();
+    }
+  }
+  if(k==="mat")renderMat(); if(k==="log")renderLog(); if(k==="ev")renderEv();
+  renderGuide();
+}
+Object.keys(panes).forEach(k=>document.getElementById("tab-"+k).addEventListener("click",()=>switchTab(k)));
 
 /* language */
 function setLang(l){
   lang=l;
   ["de","tr","en"].forEach(k=>document.getElementById("lang-"+k).setAttribute("aria-pressed",String(l===k)));
-  renderChrome(); renderLenses(); renderPicker(); renderDoc(); renderTurns(); renderMat(); renderLog(); renderCmp(); renderCounts();
+  renderChrome(); renderLenses(); renderPicker(); renderDoc(); renderTurns(); renderMat(); renderLog(); renderCmp(); renderCounts(); renderGuide();
   const sb=document.getElementById("selbox"); if(!draft.span)sb.textContent=t().selEmpty;
 }
 ["de","tr","en"].forEach(k=>document.getElementById("lang-"+k).addEventListener("click",()=>setLang(k)));
@@ -1074,7 +1201,7 @@ load();
 try{ if(!localStorage.getItem("kw.seen.how")){ document.getElementById("how").open=true;
      localStorage.setItem("kw.seen.how","1"); } }catch(e){ document.getElementById("how").open=true; }
 renderChrome(); renderLenses(); renderPicker(); renderDoc(); resetDraft();
-renderTurns(); renderMat(); renderLog(); renderCmp(); renderCounts(); renderEv();
+renderTurns(); renderMat(); renderLog(); renderCmp(); renderCounts(); renderEv(); renderGuide();
 </script>
 
 </body>
