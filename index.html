@@ -527,6 +527,14 @@ function cur(){return state.excerpts.find(x=>x.id===state.current)||state.excerp
    always anchored to the selected span.
 ---------------------------------------------------------------- */
 const ESSENTIALISE=/\b(die\s+)?(deutschen|türken|schweizer|österreicher|almanlar|türkler|isviçreliler|avusturyalılar|germans|turks|austrians|the\s+swiss)\b|\b(alle|immer|nie|typisch|jeder)\b|\b(hepsi|herkes|hep|asla|tipik)\b|\b(always|never|typical|everyone)\b/i;
+
+/* v2 triggers. A verdict on the polity is not a reading of the text; and a
+   quotation that adds no words of the learner's own is not an interpretation. */
+const EVALUATIVE=/(?:^|[^\p{L}])(rückständig|fortschrittlich|besser|schlechter|primitiv|vorbildlich|engstirnig|aufgeklärt|zurückgeblieben|geri kalmış|ileri)\p{L}*/iu;
+const ACTOR=/(?:^|[^\p{L}])(staat|land|regierung|politik|system|ülke|devlet|hükümet)\p{L}*/iu;
+const REPORT=/(im text steht|hier heißt es|dort steht|es heißt|danach folgt|das ist der inhalt|metinde|yazıyor)/iu;
+const INTERPRET=/(?:^|[^\p{L}])(weil|deshalb|dadurch|sodass|das heißt|dargestellt|macht|zeigt|bedeutet|wirkt|çünkü|demek)\p{L}*/iu;
+
 const STOP=new Set("der die das den dem des und oder ein eine einer für von mit auch als ist sind wird werden nicht bei aus auf zu im in an um über nach vor ve ile bir bu şu da de için gibi olarak ancak ise the of and to a in is are".split(" "));
 
 function tokens(s){return (s.toLowerCase().match(/[\p{L}\p{N}]{4,}/gu)||[]).filter(w=>!STOP.has(w));}
@@ -542,8 +550,13 @@ function respond(kind){
   const c=cur(), span=draft.span||c.text, just=document.getElementById("just").value.trim();
   const q=shorten(span,7);
   let type,text;
+  const own=tokens(just), spanSet=new Set(tokens(span));
+  const ownShare=own.length?own.filter(w=>!spanSet.has(w)).length/own.length:1;
   if(ESSENTIALISE.test(just)){ type="reframe"; text=t().fb.reframe(q); }
+  else if(EVALUATIVE.test(just) && ACTOR.test(just)){ type="reframe"; text=t().fb.reframe(q); }
   else if(overlap(just,span)===0 && just.length>0){ type="evidence"; text=t().fb.evidence(q); }
+  else if(just.length>0 && REPORT.test(just) && !INTERPRET.test(just)){ type="evidence"; text=t().fb.evidence(q); }
+  else if(just.length>0 && ownShare<0.45){ type="evidence"; text=t().fb.evidence(q); }
   else{
     const others=Object.values(state.ann).map(a=>a.country).filter(x=>x&&x!==c.country);
     if(others.length && Math.random()<.5){ type="contrast"; text=t().fb.contrast(q,others[0]); }
