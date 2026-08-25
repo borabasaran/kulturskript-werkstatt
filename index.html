@@ -212,6 +212,7 @@ footer{margin-top:26px;padding-top:14px;border-top:1px solid var(--line);font-si
       <div class="seg" role="group" aria-label="Sprache">
         <button id="lang-de" aria-pressed="true">DE</button>
         <button id="lang-tr" aria-pressed="false">TR</button>
+        <button id="lang-en" aria-pressed="false">EN</button>
       </div>
     </div>
   </div>
@@ -227,7 +228,7 @@ footer{margin-top:26px;padding-top:14px;border-top:1px solid var(--line);font-si
 <div class="wrap">
 
   <div class="notice">
-    <div><b>Prototyp.</b> <span id="notice-txt">Die Rückmeldungsebene ist hier regelbasiert nachgebildet (Wizard-of-Oz): Sie folgt exakt dem Prompt-Vertrag der Studie — kein Urteil, ein Beleg, eine Frage — ruft aber kein Sprachmodell auf. Die Demo-Exzerpte sind gekürzt; vollständige Korpuspassagen werden unter <b>Materialien</b> geladen.</span></div>
+    <div><b>Prototyp.</b> <span id="notice-txt">Die Rückmeldungsebene ist hier regelbasiert nachgebildet (Wizard-of-Oz): Sie folgt exakt dem Prompt-Vertrag der Studie — kein Urteil, ein Beleg, eine Frage — ruft aber kein Sprachmodell auf. Alle Exzerpte sind vollständige Originalpassagen aus den vier Quelldokumenten. Eigene Passagen lassen sich unter <b>Materialien</b> laden.</span></div>
   </div>
 
   <!-- ================= WORK ================= -->
@@ -350,7 +351,7 @@ const S = {
  de:{
   tagline:"Kulturelle Rahmung in authentischen Politiktexten sichtbar machen · B2–C1",
   tabs:["Arbeiten","Vergleich","Materialien","Protokoll"],
-  notice:'Die Rückmeldungsebene ist hier regelbasiert nachgebildet (Wizard-of-Oz): Sie folgt exakt dem Prompt-Vertrag der Studie — kein Urteil, ein Beleg, eine Frage — ruft aber kein Sprachmodell auf. Die Demo-Exzerpte sind gekürzt; vollständige Korpuspassagen werden unter <b>Materialien</b> geladen.',
+  notice:'Die Rückmeldungsebene ist hier regelbasiert nachgebildet (Wizard-of-Oz): Sie folgt exakt dem Prompt-Vertrag der Studie — kein Urteil, ein Beleg, eine Frage — ruft aber kein Sprachmodell auf. Alle Exzerpte sind vollständige Originalpassagen aus den vier Quelldokumenten. Eigene Passagen lassen sich unter <b>Materialien</b> laden.',
   lText:"Text", lLens:"Linsen", lSel:"Markierte Stelle", lDlg:"Rückmeldung",
   selEmpty:"Markiere zuerst eine Stelle im Text.",
   hint:"Markiere mit der Maus eine Stelle im Text — ein Satzteil genügt. Beantworte dann die drei Fragen und begründe deine Lesart am Wortlaut.",
@@ -392,7 +393,7 @@ const S = {
  tr:{
   tagline:"Özgün politika metinlerinde kültürel çerçevelemeyi görünür kılmak · B2–C1",
   tabs:["Çalışma","Karşılaştırma","Materyaller","Kayıt"],
-  notice:'Geri bildirim katmanı burada kural tabanlı olarak canlandırılmıştır (Wizard-of-Oz): Çalışmanın prompt sözleşmesini birebir izler — yargı yok, bir kanıt, bir soru — ama bir dil modeli çağırmaz. Demo alıntıları kısaltılmıştır; tam korpus pasajları <b>Materyaller</b> sekmesinden yüklenir.',
+  notice:'Geri bildirim katmanı burada kural tabanlı olarak canlandırılmıştır (Wizard-of-Oz): Çalışmanın prompt sözleşmesini birebir izler — yargı yok, bir kanıt, bir soru — ama bir dil modeli çağırmaz. Bütün alıntılar dört kaynak belgeden alınmış tam pasajlardır. Kendi pasajlarınızı <b>Materyaller</b> sekmesinden yükleyebilirsiniz.',
   lText:"Metin", lLens:"Mercekler", lSel:"Seçili yer", lDlg:"Geri bildirim",
   selEmpty:"Önce metinde bir yer seçin.",
   hint:"Metinde fareyle bir yer seçin — bir cümle parçası yeter. Sonra üç soruyu yanıtlayın ve okumanızı metnin sözcüklerine dayandırın.",
@@ -430,36 +431,85 @@ const S = {
         q=>`Bu tabloda kim kimin bakımını üstleniyor — ve kim anılmıyor?`,
         q=>`Seçtiğiniz sözcük olmasaydı gerekçe yine ayakta kalır mıydı?`]
   }
+ },
+ en:{
+  tagline:"Making cultural framing visible in authentic policy texts · B2–C1",
+  tabs:["Work","Compare","Materials","Log"],
+  notice:'The feedback layer is reproduced here by rule (Wizard-of-Oz): it follows the study\'s prompt contract exactly — no verdict, one piece of evidence, one question — but calls no language model. All excerpts are full original passages from the four source documents; load your own under <b>Materials</b>.',
+  lText:"Text", lLens:"Lenses", lSel:"Selected passage", lDlg:"Feedback",
+  selEmpty:"Select a stretch of the text first.",
+  hint:"Select a stretch of text with the mouse — a clause is enough. Then answer the three questions and anchor your reading in the wording.",
+  justH:"Justification", justQ:"What in the wording anchors your reading?",
+  justPh:"Because the text here …",
+  meter:"at least 80 characters", save:"Save", ask:"Ask", reset:"Clear",
+  stateNew:"new", stateSaved:"saved", stateRev:"version",
+  dlgEmpty:"No feedback yet. Save an annotation or ask a question.",
+  types:{evidence:"Evidence requested",contrast:"Contrast",reframe:"Reframed",ack:"Pressed further",learner:"You"},
+  cmpH:"Compare", cmpSub:"Comparison unlocks once you have annotated passages from two countries — your own readings then sit side by side.",
+  cmpLocked:"Still locked. Annotate one passage from each of two different texts.",
+  matH:"Materials", matSub:"Load the full passages from your corpus here. An excerpt of 80–150 words works best.",
+  mt:"Title", mc:"Country", ms:"Source", mx:"Passage", mAdd:"Add", mBank:"Excerpt bank",
+  mtPh:"e.g. Chapter 3, paragraph 2", msPh:"Publisher, year, page", mxPh:"Paste the passage in the original …",
+  logH:"Log", logSub:"Every annotation, revision and response is recorded here — the data behind the evaluation.",
+  head:["Time","Excerpt","Event","Lenses","Characters"],
+  stats:["Annotations","Revisions","Responses","Excerpts"],
+  export:"Export log", clear:"Clear session",
+  exported:"Log saved.", copied:"Copied to clipboard.",
+  demo:"abridged",
+  foot:"Kulturskript-Werkstatt · Prototype for the study “Family as Cultural Script in the Digital Classroom” · Anadolu University, BAP SÇB-2026-3204. Country names are metadata of the text, not a claim about people.",
+  lenses:[
+   {h:"What is at stake?", q:"Which problem does this passage treat as the problem to be solved?",
+    o:[["A","population and generations"],["B","income, work, reconciliation"],["C","law and institutions"],["D","digital life"],["E","crisis and security"]]},
+   {h:"How is the family pictured?", q:"What image of the family does this passage presuppose?",
+    o:[["A","as a bearer of identity and continuity"],["B","as a moral order"],["C","as a plurality of ways of living"],["D","as the place where care happens"]]},
+   {h:"How does the text make its case?", q:"What does this passage rest its claim on?",
+    o:[["A","on values"],["B","on numbers and evidence"],["C","on goals and measures"],["D","on advocacy for a group"]]}
+  ],
+  fb:{
+   evidence:q=>`Which words in “${q}” lead you to this reading? Quote the place you anchor it in.`,
+   reframe:q=>`A text is speaking here, not a country. Which wording in “${q}” carries that claim?`,
+   contrast:(q,o)=>`You have already annotated ${o}. Where does “${q}” say something different about the same thing?`,
+   ack:[q=>`And what counts here as the cause of the problem?`,
+        q=>`Who cares for whom in this picture — and who goes unnamed?`,
+        q=>`Would the justification still stand without the word you selected?`]
+  }
  }
 };
 
 /* ---------------------------------------------------------------
-   Seed excerpts. These carry ONLY the short fragments already
-   published in the companion study; they are marked as abbreviated.
-   Full corpus passages are loaded through the Materials tab.
+   Seed excerpts — verbatim passages from the four source documents,
+   each cited with its page. Further passages can be loaded at
+   runtime through the Materials tab.
 ---------------------------------------------------------------- */
+const TR_SRC="ASHB (2024): Ailenin Korunması ve Güçlendirilmesi Vizyon Belgesi ve Eylem Planı 2024–2028";
 const SEEDS = [
- {id:"tr-1",country:"Türkiye",title:"Aile politikası — eylem planı",demo:true,
-  text:"… milli ve manevi değerleri nesiller boyu aktarma …",
-  src:"Gekürztes Demo-Fragment. Vollständige Passage unter „Materialien“ laden."},
- {id:"tr-2",country:"Türkiye",title:"Aile politikası — durum tespiti",demo:true,
-  text:"… ciddi tehdit ve risklerle karşı karşıya …",
-  src:"Gekürztes Demo-Fragment. Vollständige Passage unter „Materialien“ laden."},
- {id:"de-1",country:"Deutschland",title:"Familienbericht — Zielsetzung",demo:true,
-  text:"… Vielfalt ermöglichen …",
-  src:"Gekürztes Demo-Fragment. Vollständige Passage unter „Materialien“ laden."},
- {id:"ch-1",country:"Schweiz",title:"Familienstatistik — Befund",demo:true,
-  text:"… Einelternhaushalte … um 166 % zugenommen …",
-  src:"Gekürztes Demo-Fragment. Vollständige Passage unter „Materialien“ laden."},
- {id:"at-1",country:"Österreich",title:"Familienbericht — Grundlegung",demo:true,
-  text:"… Familie als Träger der Gesellschaft …",
-  src:"Gekürztes Demo-Fragment. Vollständige Passage unter „Materialien“ laden."}
+ {id:"tr-tanimlar",country:"Türkiye",title:"Tanımlar (s. 8)",demo:false,
+  text:"Aile: İnsanın temel biyolojik, psikolojik ve sosyal ihtiyaçlarını karşılamak üzere, kan, soy veya evlilik/hukuki birliktelik ya da evlat edinme bağları ile birbirine bağlı yakın insan ilişkilerinden oluşan ve nesiller/kuşaklar boyu görece değişerek devam eden bir sosyal kurum ve aynı zamanda bir sosyal etkileşim ağı. Evlilik: Bir kadın ve bir erkeğin usulüne göre yetki verilmiş bir memur önünde bir aile kurmak amacı ile yapmış oldukları medenî hukuk sözleşmesi. Ailenin Güçlendirilmesi: Aile bireylerinin sosyal, ekonomik ve psikolojik yönden iyilik hallerinin ve dayanıklılıklarının desteklenerek ailenin yaşam becerileri ve işlevselliği ile milli ve manevi değerleri nesiller boyu aktarma kapasitesinin artırılması.",
+  src:TR_SRC+", s. 8."},
+ {id:"tr-vizyon-1",country:"Türkiye",title:"Vizyonumuz, 1. paragraf (s. 9)",demo:false,
+  text:"Geçmişten günümüze insanın var olma sürecinde kadim dayanağı olan aile, yapısı ve işlevleri bakımından alternatifi olmayan bir müessesedir. Milletlerin belirleyici vasıflarının, değerlerinin, kültürel ve tarihsel kimliğinin aktarılmasını ve kuşaklar arası bağın sürdürülmesini sağlayan bir köprü olarak ailenin varlığı geleceğimizin en kıymetli hazinesidir. Aile sadece manevi varlığı ile değil, sosyal, ekonomik, psikolojik, ahlaki yönlerden yerine getirdiği işlevleri ile sosyal koruma ve destek sağlaması açılarından da toplumun düzeni ve devamlılığı için önemli bir kurumdur.",
+  src:TR_SRC+", s. 9."},
+ {id:"tr-vizyon-3",country:"Türkiye",title:"Vizyonumuz, 3. paragraf (s. 9)",demo:false,
+  text:"Aile kurumu, küresel değişim ve dönüşümlerle birlikte toplumsal sorunların çeşitlenmesiyle ciddi tehdit ve risklerle karşı karşıya kalmaktadır. Küresel eğilimler, ekonomik dalgalanmalar, afetler, teknolojik gelişmeler, kültürel değerlerdeki aşınmalar, düzensiz şehirleşme, göç hareketleri, demografik değişimler, cinsiyetsizleştirme gibi aile ve evlilik kurumunu hedef alan zararlı akımlar ve bireyselleşme ailenin karşılaştığı riskleri artırmaktadır. Dijitalleşen dünyada eğitimden teknolojiye, şehirleşmeden demografik değişimlere kadar yaşanan hızlı toplumsal dönüşümler, ailenin işlevleri, yapısı ile sahip olduğu tutum ve değerleri etkilemektedir. Yaşanan değişim ve dönüşümler nedeniyle, birliği, refahı ve yapısı etkilenen aile kurumu pek çok zorlukla karşı karşıya kalmaktadır.",
+  src:TR_SRC+", s. 9."},
+ {id:"tr-demografi",country:"Türkiye",title:"Demografik görünüm (s. 10)",demo:false,
+  text:"Ülkemizde ise nüfus tahminlerine göre yaşlı nüfus oranının 2030 yılında %12,9, 2040 yılında %16,3, 2060 yılında %22,6 ve 2080 yılında %25,6 olacağı öngörülmektedir. Yaşlı nüfus olarak kabul edilen 65 yaş ve üstü nüfusun, 2018 yılında 7 milyon 186 bin 204 kişi iken son beş yılda %21,4 artarak 2023 yılında 8 milyon 722 bin 806 kişiye yükseldiği görülmektedir. Yaşlı nüfusun toplam nüfus içindeki oranı ise 2018 yılında %8,8 iken, 2023 yılında %10,2'ye yükselerek ilk kez iki basamaklı bir rakama ulaşmıştır. Ülkemizdeki doğurganlık hızı da küresel düzeydeki demografik değişim sürecine benzer bir eğilim göstermekte olup; 2001 yılında 2,38 çocuk iken, 2022 yılında 1,62 çocuğa gerilemiştir.",
+  src:TR_SRC+", s. 10."},
+ {id:"de-vielfalt",country:"Deutschland",title:"„Vielfalt ermöglichen“ (S. 29)",demo:false,
+  text:"Familie ist dort, wo Menschen langfristig Verantwortung füreinander übernehmen. In Deutschland wird Familie heute auf vielfältige Weise gelebt und auch die Wege in die Elternschaft sind heute diverser als noch vor einigen Jahrzehnten. Leitbilder von Familie, Elternschaft und Partnerschaft haben sich gewandelt. Es gibt mehr Entscheidungsmöglichkeiten und Freiräume, das eigene Leben zu gestalten. Die meisten Kinder wachsen mit beiden leiblichen Eltern auf. Ein Teil der Kinder lebt aber auch in Patchwork- und Stieffamilien oder wird von allein- und getrennterziehenden oder gleichgeschlechtlichen Eltern großgezogen. In immer mehr Familien hat mindestens ein Elternteil einen Migrationshintergrund. Diese Vielfalt macht Familie auch zu einer „anspruchsvollen Gestaltungsaufgabe“. So vielfältig wie die Familien sind auch ihre Bedarfe, Ressourcen und Wünsche.",
+  src:"BMFSFJ (2024): Familienreport 2024, Kapitel 3 „Vielfalt ermöglichen“, S. 29."},
+ {id:"ch-haushalte",country:"Schweiz",title:"Familienhaushalte mit Kindern (S. 10)",demo:false,
+  text:"Die grosse Mehrheit der Haushalte mit Kindern unter 25 Jahren sind verheiratete Paare (74%). Dabei handelt es sich bei 96% um Erstfamilien, 4% sind Fortsetzungsfamilien, auch Patchworkfamilien genannt. Es sind Haushalte, bei denen mindestens ein Elternteil ein Kind aus einer früheren Beziehung in die neue Familie hineingebracht hat. Bei knapp einem Zehntel der Haushalte mit Kindern unter 25 Jahren (9%) leben die Eltern in einer Konsensualpartnerschaft. Der Anteil Fortsetzungsfamilien ist hier deutlich höher als bei den Ehepaarhaushalten: Rund 30% aller Konsensualpaare mit Kindern sind Fortsetzungsfamilien. Die Einelternhaushalte machen 16% der Familienhaushalte mit Kindern aus. Es sind mehrheitlich alleinlebende Mütter (83%), bei rund einem Sechstel (17%) handelt es sich um alleinlebende Väter. Etwa 0,1% der Haushalte mit Kindern unter 25 Jahren sind gleichgeschlechtliche Paare.",
+  src:"BFS (2021): Familien in der Schweiz, Abschnitt 2.1.1, S. 10."},
+ {id:"at-ziele",country:"Österreich",title:"Ziele der Familienpolitik (S. 18–19)",demo:false,
+  text:"Die Ziele der Familienpolitik sind von der jeweiligen Ausgangslage und gesamtstaatlichen Ausrichtung abhängig und verändern sich im Laufe der Zeit. So wurden im politischen Diskurs der jüngeren Zeit viele zentrale Elemente bisheriger Familienpolitik in Frage gestellt. Die Zielgruppe der Familienpolitik hat sich von Kernfamilie und Ehe schrittweise zu vielfältigen Arten des Zusammenlebens verschoben und es gilt vielmehr ein auf Kinder zentriertes Konzept, z. B.: Familie ist, wo Kinder sind. Der Fokus auf Familie als rein reproduktive Einheit wurde um Bildung, Humankapital und Gleichstellung ergänzt. Mit der fortschreitenden Bevölkerungsalterung in Europa rückten sowohl die Geburtenraten (zur Stützung des Pensionssystems) als auch die weibliche Erwerbstätigkeit (Arbeitskräfte) wieder mehr ins Zentrum öffentlicher Aufmerksamkeit.",
+  src:"6. Österreichischer Familienbericht 2009–2019, Abschnitt I, Kap. 3.1, S. 18–19."}
 ];
 
 /* ---------------------------------------------------------------
    State
 ---------------------------------------------------------------- */
-const KEY="kw.session.v1";
+const KEY="kw.session.v3";
 let lang="de";
 let state={excerpts:SEEDS.slice(),current:SEEDS[0].id,ann:{},log:[],turns:[]};
 let draft={span:"",l1:null,l2:null,l3:null};
@@ -476,7 +526,7 @@ function cur(){return state.excerpts.find(x=>x.id===state.current)||state.excerp
    never names a lens option, never evaluates a country, one question,
    always anchored to the selected span.
 ---------------------------------------------------------------- */
-const ESSENTIALISE=/\b(die\s+)?(deutschen|türken|schweizer|österreicher|almanlar|türkler|isviçreliler|avusturyalılar)\b|\b(alle|immer|nie|typisch|jeder)\b|\b(hepsi|herkes|hep|asla|tipik)\b/i;
+const ESSENTIALISE=/\b(die\s+)?(deutschen|türken|schweizer|österreicher|almanlar|türkler|isviçreliler|avusturyalılar|germans|turks|austrians|the\s+swiss)\b|\b(alle|immer|nie|typisch|jeder)\b|\b(hepsi|herkes|hep|asla|tipik)\b|\b(always|never|typical|everyone)\b/i;
 const STOP=new Set("der die das den dem des und oder ein eine einer für von mit auch als ist sind wird werden nicht bei aus auf zu im in an um über nach vor ve ile bir bu şu da de için gibi olarak ancak ise the of and to a in is are".split(" "));
 
 function tokens(s){return (s.toLowerCase().match(/[\p{L}\p{N}]{4,}/gu)||[]).filter(w=>!STOP.has(w));}
@@ -742,13 +792,11 @@ Object.keys(panes).forEach(k=>document.getElementById("tab-"+k).addEventListener
 /* language */
 function setLang(l){
   lang=l;
-  document.getElementById("lang-de").setAttribute("aria-pressed",String(l==="de"));
-  document.getElementById("lang-tr").setAttribute("aria-pressed",String(l==="tr"));
+  ["de","tr","en"].forEach(k=>document.getElementById("lang-"+k).setAttribute("aria-pressed",String(l===k)));
   renderChrome(); renderLenses(); renderPicker(); renderDoc(); renderTurns(); renderMat(); renderLog(); renderCmp(); renderCounts();
   const sb=document.getElementById("selbox"); if(!draft.span)sb.textContent=t().selEmpty;
 }
-document.getElementById("lang-de").addEventListener("click",()=>setLang("de"));
-document.getElementById("lang-tr").addEventListener("click",()=>setLang("tr"));
+["de","tr","en"].forEach(k=>document.getElementById("lang-"+k).addEventListener("click",()=>setLang(k)));
 
 /* boot */
 load();
