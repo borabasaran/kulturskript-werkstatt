@@ -173,6 +173,28 @@ details.how[open] summary::before{transform:rotate(90deg)}
 .exrow.weak .tag{color:var(--amber)} .exrow.strong .tag{color:var(--sage)}
 .why{font-size:12.5px;color:var(--muted);margin:11px 0 0}
 
+/* ---- evaluation ---- */
+.evgroup{margin-top:22px}
+.evgroup h3{font-family:Newsreader,Georgia,serif;font-size:17px;font-weight:600;margin:0 0 2px}
+.evgroup p.gd{margin:0 0 10px;font-size:12.5px;color:var(--muted)}
+.evitem{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:start;
+  padding:9px 0;border-top:1px solid var(--line)}
+.evitem .lbl{font-size:13.5px;line-height:1.45}
+.evitem .lbl .code{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--faint);margin-right:7px}
+.scale{display:flex;gap:4px}
+.scale button{width:30px;height:30px;border:1px solid var(--line-strong);background:var(--surface);
+  border-radius:var(--r);font-size:12.5px;font-weight:600;color:var(--muted);cursor:pointer}
+.scale button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+:root[data-theme="dark"] .scale button[aria-pressed="true"],
+:root:not([data-theme="light"]) .scale button[aria-pressed="true"]{color:#0F1416}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .scale button[aria-pressed="true"]{color:#fff}}
+.evopen{margin-top:16px}
+.evopen label{display:block;font-size:13.5px;font-weight:600;margin-bottom:5px;line-height:1.45}
+.evopen textarea{min-height:70px}
+.evnote{font-size:12.5px;color:var(--muted);background:var(--sunk);border-radius:var(--r);padding:10px 13px;margin:0 0 4px}
+.evmeta{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-top:10px}
+.evdone{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:20px;padding-top:16px;border-top:1px solid var(--line)}
+
 /* ---- dialogue strip ---- */
 .strip{margin-top:18px}
 .turns{display:flex;flex-direction:column;gap:10px;max-height:290px;overflow-y:auto}
@@ -246,6 +268,7 @@ footer{margin-top:26px;padding-top:14px;border-top:1px solid var(--line);font-si
   <button role="tab" id="tab-cmp" aria-selected="false">Vergleich<span class="count" id="cmp-count">0/2</span></button>
   <button role="tab" id="tab-mat" aria-selected="false">Materialien<span class="count" id="mat-count">0</span></button>
   <button role="tab" id="tab-log" aria-selected="false">Protokoll<span class="count" id="log-count">0</span></button>
+  <button role="tab" id="tab-ev" aria-selected="false">Bewertung<span class="count" id="ev-count">0/29</span></button>
 </nav>
 
 <div class="wrap">
@@ -375,6 +398,24 @@ footer{margin-top:26px;padding-top:14px;border-top:1px solid var(--line);font-si
     </div></div>
   </section>
 
+  <!-- ================= EVALUATION ================= -->
+  <section id="p-ev" class="hidden">
+    <div style="height:18px"></div>
+    <h2 class="sec">Uzman Değerlendirme Formu</h2>
+    <p class="sub">Yanıtlarınız bildiride anonim olarak ("Değerlendirici 1–5") kullanılacaktır. Ad, kurum ve iletişim bilgisi istenmemektedir. Yazdıklarınız yalnızca sizin tarayıcınızda tutulur; bana ancak en alttaki düğmeyle indirip gönderdiğiniz dosyayla ulaşır.</p>
+    <div class="card"><div class="card-b">
+      <p class="evnote"><b>Değerlendirmeden önce lütfen aracı kullanın:</b> bir Türkiye pasajı ve bir Almanca pasaj üzerinde birer açıklama yapın, birini düzeltip yeniden kaydedin, bir de bilerek genelleyici bir cümle deneyin. Formun C bölümü bunları görmüş olmanızı varsayıyor.</p>
+      <p class="evnote" style="margin-top:8px">Ölçek: <b>1</b> hiç katılmıyorum · <b>2</b> katılmıyorum · <b>3</b> kararsızım · <b>4</b> katılıyorum · <b>5</b> tamamen katılıyorum</p>
+      <div id="ev-body"></div>
+
+      <div class="evdone">
+        <button class="btn primary" id="ev-dl">Çalışmamı indir</button>
+        <span id="ev-msg" style="font-size:12.5px;color:var(--muted)"></span>
+      </div>
+      <p class="why" style="margin-top:10px">İndirdiğiniz dosyayı bbasaran@anadolu.edu.tr adresine gönderdiğinizde, yanıtlarınızın anonimleştirilmiş biçimde bilimsel bir yayında kullanılmasına onay vermiş olursunuz.</p>
+    </div></div>
+  </section>
+
   <footer id="foot"></footer>
 </div>
 
@@ -388,7 +429,7 @@ footer{margin-top:26px;padding-top:14px;border-top:1px solid var(--line);font-si
 const S = {
  de:{
   tagline:"Kulturelle Rahmung in authentischen Politiktexten sichtbar machen · B2–C1",
-  tabs:["Arbeiten","Vergleich","Materialien","Protokoll"],
+  tabs:["Arbeiten","Vergleich","Materialien","Protokoll","Bewertung"],
   notice:'Die Rückmeldungsebene ist hier regelbasiert nachgebildet (Wizard-of-Oz): Sie folgt exakt dem Prompt-Vertrag der Studie — kein Urteil, ein Beleg, eine Frage — ruft aber kein Sprachmodell auf. Alle Exzerpte sind vollständige Originalpassagen aus den vier Quelldokumenten. Eigene Passagen lassen sich unter <b>Materialien</b> laden.',
   lText:"Text", lLens:"Linsen", lSel:"Markierte Stelle", lDlg:"Rückmeldung",
   selEmpty:"Markiere zuerst eine Stelle im Text.",
@@ -443,7 +484,7 @@ const S = {
  },
  tr:{
   tagline:"Özgün politika metinlerinde kültürel çerçevelemeyi görünür kılmak · B2–C1",
-  tabs:["Çalışma","Karşılaştırma","Materyaller","Kayıt"],
+  tabs:["Çalışma","Karşılaştırma","Materyaller","Kayıt","Değerlendirme"],
   notice:'Geri bildirim katmanı burada kural tabanlı olarak canlandırılmıştır (Wizard-of-Oz): Çalışmanın prompt sözleşmesini birebir izler — yargı yok, bir kanıt, bir soru — ama bir dil modeli çağırmaz. Bütün alıntılar dört kaynak belgeden alınmış tam pasajlardır. Kendi pasajlarınızı <b>Materyaller</b> sekmesinden yükleyebilirsiniz.',
   lText:"Metin", lLens:"Mercekler", lSel:"Seçili yer", lDlg:"Geri bildirim",
   selEmpty:"Önce metinde bir yer seçin.",
@@ -498,7 +539,7 @@ const S = {
  },
  en:{
   tagline:"Making cultural framing visible in authentic policy texts · B2–C1",
-  tabs:["Work","Compare","Materials","Log"],
+  tabs:["Work","Compare","Materials","Log","Evaluation"],
   notice:'The feedback layer is reproduced here by rule (Wizard-of-Oz): it follows the study\'s prompt contract exactly — no verdict, one piece of evidence, one question — but calls no language model. All excerpts are full original passages from the four source documents; load your own under <b>Materials</b>.',
   lText:"Text", lLens:"Lenses", lSel:"Selected passage", lDlg:"Feedback",
   selEmpty:"Select a stretch of the text first.",
@@ -588,11 +629,11 @@ const SEEDS = [
 ---------------------------------------------------------------- */
 const KEY="kw.session.v3";
 let lang="de";
-let state={excerpts:SEEDS.slice(),current:SEEDS[0].id,ann:{},log:[],turns:[]};
+let state={excerpts:SEEDS.slice(),current:SEEDS[0].id,ann:{},log:[],turns:[],eval:{}};
 let draft={span:"",l1:null,l2:null,l3:null};
 
 function load(){try{const r=localStorage.getItem(KEY);if(r){const p=JSON.parse(r);
-  if(p&&p.excerpts&&p.excerpts.length){state=p;}}}catch(e){}}
+  if(p&&p.excerpts&&p.excerpts.length){state=p; if(!state.eval)state.eval={};}}}catch(e){}}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}}
 function t(){return S[lang];}
 function now(){const d=new Date();return d.toTimeString().slice(0,8);}
@@ -656,7 +697,7 @@ function logEvent(ev,extra){
 function renderChrome(){
   const s=t();
   document.getElementById("tagline").textContent=s.tagline;
-  ["work","cmp","mat","log"].forEach((k,i)=>{
+  ["work","cmp","mat","log","ev"].forEach((k,i)=>{
     const b=document.getElementById("tab-"+k);
     const c=b.querySelector(".count");
     b.childNodes[0].nodeValue=s.tabs[i];
@@ -877,17 +918,18 @@ document.getElementById("m-add").addEventListener("click",()=>{
 });
 
 document.getElementById("clearall").addEventListener("click",()=>{
-  state={excerpts:SEEDS.slice(),current:SEEDS[0].id,ann:{},log:[],turns:[]};
+  state={excerpts:SEEDS.slice(),current:SEEDS[0].id,ann:{},log:[],turns:[],eval:{}};
   save(); resetDraft(); renderPicker(); renderDoc(); renderTurns(); renderMat(); renderLog(); renderCmp(); renderCounts();
 });
 
-document.getElementById("export").addEventListener("click",async()=>{
+async function downloadWork(msgId){
   const payload=JSON.stringify({
-    version:"kulturskript-werkstatt v3",
+    version:"kulturskript-werkstatt v4",
     language:lang,
+    evaluation:state.eval||{},
     annotations:state.ann, log:state.log, turns:state.turns
   },null,2);
-  const msg=document.getElementById("export-msg");
+  const msg=document.getElementById(msgId);
   const name="kulturskript-arbeit.json";
   try{
     const d=await window.claude?.use?.("downloads");
@@ -903,16 +945,119 @@ document.getElementById("export").addEventListener("click",async()=>{
   }catch(e){}
   try{ await navigator.clipboard.writeText(payload); msg.textContent=t().copied; }
   catch(e){ msg.textContent="—"; }
-});
+}
+document.getElementById("export").addEventListener("click",()=>downloadWork("export-msg"));
+document.getElementById("ev-dl").addEventListener("click",()=>downloadWork("ev-msg"));
+
+/* ---------------------------------------------------------------
+   Evaluation form. Authored in Turkish: the expert reviewers are
+   Turkish-based DaF colleagues. Responses live in state.eval and
+   travel inside the exported file.
+---------------------------------------------------------------- */
+const EV_GROUPS=[
+ {h:"A · Pedagojik uygunluk", d:"Ortamın öğretim hedefine hizmet edip etmediği.",
+  items:[["A1","Ortam, kültürel çerçevelemeyi öğrenci için fark edilebilir kılıyor."],
+         ["A2","Görev, ülke hakkında bilgi hatırlamayı değil, metni yorumlamayı gerektiriyor."],
+         ["A3","Gerekçe alanı, öğrencinin izlenimden kanıta geçmesini sağlıyor."],
+         ["A4","Görev, Byram'ın eleştirel kültür bilinci hedefine hizmet ediyor."]]},
+ {h:"B · Merceklerin anlaşılırlığı", d:"Üç sorunun ve seçeneklerin öğrenci için ulaşılabilirliği.",
+  items:[["B1","Üç mercek sorusu B2–C1 düzeyindeki bir öğrenci için anlaşılır."],
+         ["B2","Seçenek kümeleri, aralarında hiyerarşi sezdirmeden sunulmuş."],
+         ["B3","İkinci mercek (ailenin nasıl resmedildiği) seçenekleri birbirinden yeterince ayrılıyor."],
+         ["B4","Üçüncü mercek (gerekçelendirme biçimi) öğrenci için ulaşılabilir bir ayrım."]]},
+ {h:"C · Geri bildirimin niteliği", d:"Kaydettikten sonra alt şeritte çıkan yanıtları düşünerek işaretleyin.",
+  items:[["C1","Geri bildirim, doğru seçeneği ele vermiyor."],
+         ["C2","Geri bildirim, öğrenciyi metinden kanıt göstermeye yöneltiyor."],
+         ["C3","Geri bildirim, ülke ya da politika hakkında yargı bildirmiyor."],
+         ["C4","Genelleyici ifadeye verilen yanıt, öğrenciyi metnin sözcüklerine geri döndürüyor."],
+         ["C5","Geri bildirimin uzunluğu ve dili hedef düzeye uygun."]]},
+ {h:"D · Derse entegre edilebilirlik", d:"Kendi ders bağlamınızı düşünerek.",
+  items:[["D1","Bu ortamı kendi dersimde kullanabilirim."],
+         ["D2","Bir ders saati (45 dk) içinde anlamlı bir çalışma yapılabilir."],
+         ["D3","Ortam, öğretmene sınıfta ek yük getirmiyor."],
+         ["D4","Kayıt sekmesindeki veriler, öğrenci gelişimini izlemek için kullanışlı."]]}
+];
+const EV_OPEN=[
+ ["S1","Öğrencilerinizin bu görevde en çok nerede zorlanacağını düşünüyorsunuz?"],
+ ["S2","Geri bildirim katmanının bir öğrencinin düşünmesini kolaylaştırdığı ya da tam tersine yerine geçtiği bir an oldu mu? Somut olarak anlatır mısınız?"],
+ ["S3","Ülke adlarının yalnızca künye bilgisi olarak tutulması, kültürel özcülüğü önlemek için yeterli mi? Ne eklerdiniz?"],
+ ["S4","Bu ortamı derste kullanmadan önce mutlaka değişmesi gereken tek şey nedir?"]
+];
+const EV_SENT=[
+ ["E1","Metne gerçekten yaslanan, iyi bir gerekçe:"],
+ ["E2","Kulağa hoş gelen ama metindeki hiçbir sözcüğe dayanmayan bir gerekçe:"],
+ ["E3","Metinden bir ülke ya da halk hakkında genelleme yapan bir gerekçe:"],
+ ["E4","Yalnızca metni tekrar eden, yorum içermeyen bir gerekçe:"]
+];
+const EV_META=[
+ ["M1","Almanca öğretiminde deneyim (yıl)"],
+ ["M2","Ağırlıklı olarak çalıştığınız düzey"],
+ ["M3","Derste dijital araç kullanımı"],
+ ["M4","Derste üretken yapay zekâ kullanımı"]
+];
+
+function evTotal(){ return EV_GROUPS.reduce((n,g)=>n+g.items.length,0)+EV_OPEN.length+EV_SENT.length+EV_META.length; }
+function evAnswered(){
+  const e=state.eval||{};
+  return Object.values(e).filter(v=>v!==null&&v!==undefined&&String(v).trim()!=="").length;
+}
+function evSet(code,val){
+  if(!state.eval) state.eval={};
+  state.eval[code]=val; save(); renderEvCount();
+}
+function renderEvCount(){
+  document.getElementById("ev-count").textContent=evAnswered()+"/"+evTotal();
+}
+function renderEv(){
+  const e=state.eval||{}, b=document.getElementById("ev-body");
+  let html="";
+  EV_GROUPS.forEach(g=>{
+    html+=`<div class="evgroup"><h3>${g.h}</h3><p class="gd">${g.d}</p>`;
+    g.items.forEach(([code,txt])=>{
+      html+=`<div class="evitem"><div class="lbl"><span class="code">${code}</span>${escapeHtml(txt)}</div>
+        <div class="scale">`+[1,2,3,4,5].map(n=>
+        `<button data-ev="${code}" data-val="${n}" aria-pressed="${String(e[code])===String(n)}">${n}</button>`).join("")+
+        `</div></div>`;
+    });
+    html+=`</div>`;
+  });
+  html+=`<div class="evgroup"><h3>Açık uçlu sorular</h3><p class="gd">Kısa yanıtlar da olur; iki üç cümle yeterli.</p>`;
+  EV_OPEN.forEach(([code,q])=>{
+    html+=`<div class="evopen"><label for="ev-${code}">${escapeHtml(code)}. ${escapeHtml(q)}</label>
+      <textarea id="ev-${code}" data-evtext="${code}">${escapeHtml(e[code]||"")}</textarea></div>`;
+  });
+  html+=`</div>`;
+  html+=`<div class="evgroup"><h3>Öğrenci cümlesi yazımı</h3>
+    <p class="gd">Bu bölüm değerlendirmenin en kritik parçası. Aşağıdaki dört durum için, gerçek bir B2–C1 öğrencisinin gerekçe alanına yazacağını düşündüğünüz cümleyi olduğu gibi yazın — kendi akademik dilinizle değil, öğrencinin ağzından. Bu cümleler sistemin daha önce görmediği bir sınama seti oluşturacak.</p>`;
+  EV_SENT.forEach(([code,q])=>{
+    html+=`<div class="evopen"><label for="ev-${code}">${escapeHtml(code)}. ${escapeHtml(q)}</label>
+      <textarea id="ev-${code}" data-evtext="${code}" style="min-height:56px">${escapeHtml(e[code]||"")}</textarea></div>`;
+  });
+  html+=`</div>`;
+  html+=`<div class="evgroup"><h3>Değerlendirici bilgisi</h3><p class="gd">Yalnızca örneklemi betimlemek için kullanılır.</p><div class="evmeta">`;
+  EV_META.forEach(([code,q])=>{
+    html+=`<div class="field"><label class="lab" for="ev-${code}">${escapeHtml(q)}</label>
+      <input id="ev-${code}" data-evtext="${code}" value="${escapeHtml(e[code]||"")}"></div>`;
+  });
+  html+=`</div></div>`;
+  b.innerHTML=html;
+  b.querySelectorAll("[data-ev]").forEach(btn=>btn.addEventListener("click",()=>{
+    const code=btn.dataset.ev;
+    evSet(code, String((state.eval||{})[code])===btn.dataset.val ? "" : btn.dataset.val);
+    renderEv();
+  }));
+  b.querySelectorAll("[data-evtext]").forEach(el=>el.addEventListener("input",()=>evSet(el.dataset.evtext, el.value)));
+  renderEvCount();
+}
 
 /* tabs */
-const panes={work:"p-work",cmp:"p-cmp",mat:"p-mat",log:"p-log"};
+const panes={work:"p-work",cmp:"p-cmp",mat:"p-mat",log:"p-log",ev:"p-ev"};
 Object.keys(panes).forEach(k=>document.getElementById("tab-"+k).addEventListener("click",()=>{
   Object.keys(panes).forEach(j=>{
     document.getElementById("tab-"+j).setAttribute("aria-selected",String(j===k));
     document.getElementById(panes[j]).classList.toggle("hidden",j!==k);
   });
-  if(k==="cmp")renderCmp(); if(k==="mat")renderMat(); if(k==="log")renderLog();
+  if(k==="cmp")renderCmp(); if(k==="mat")renderMat(); if(k==="log")renderLog(); if(k==="ev")renderEv();
 }));
 
 /* language */
@@ -929,7 +1074,7 @@ load();
 try{ if(!localStorage.getItem("kw.seen.how")){ document.getElementById("how").open=true;
      localStorage.setItem("kw.seen.how","1"); } }catch(e){ document.getElementById("how").open=true; }
 renderChrome(); renderLenses(); renderPicker(); renderDoc(); resetDraft();
-renderTurns(); renderMat(); renderLog(); renderCmp(); renderCounts();
+renderTurns(); renderMat(); renderLog(); renderCmp(); renderCounts(); renderEv();
 </script>
 
 </body>
