@@ -20,6 +20,7 @@
   --rose:#9E3F55; --rose-soft:#F6DFE3;
   --petrol:#12605B; --petrol-soft:#DCEAE6;
   --sage:#4A6B4F; --sage-soft:#E0EADF;
+  --plum:#7A4A6B;
   --shadow:0 1px 2px rgba(22,32,42,.06),0 8px 24px -14px rgba(22,32,42,.28);
   --r:3px;
 }
@@ -34,6 +35,7 @@
     --rose:#DE8FA0; --rose-soft:#2F1D22;
     --petrol:#5CB6A8; --petrol-soft:#1D3230;
     --sage:#8FB394; --sage-soft:#1D2A1F;
+    --plum:#CE9BBF;
     --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 28px -16px rgba(0,0,0,.7);
   }
 }
@@ -47,6 +49,7 @@
   --rose:#DE8FA0; --rose-soft:#2F1D22;
   --petrol:#5CB6A8; --petrol-soft:#1D3230;
   --sage:#8FB394; --sage-soft:#1D2A1F;
+  --plum:#CE9BBF;
   --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 28px -16px rgba(0,0,0,.7);
 }
 
@@ -220,12 +223,14 @@ details.how[open] summary::before{transform:rotate(90deg)}
 .turn.t-reframe  .tick{background:var(--rose)}  .turn.t-reframe  .ttype{color:var(--rose)}
 .turn.t-contrast .tick{background:var(--petrol)}.turn.t-contrast .ttype{color:var(--petrol)}
 .turn.t-ack      .tick{background:var(--sage)}  .turn.t-ack      .ttype{color:var(--sage)}
+.turn.t-meta     .tick{background:var(--plum)}   .turn.t-meta     .ttype{color:var(--plum)}
 .turn.t-learner  .tick{background:var(--line-strong)}
 .ttype{font-size:10.5px;font-weight:700;letter-spacing:.11em;text-transform:uppercase}
 .tbody{font-size:14px;margin-top:1px}
 .turn.t-learner .tbody{color:var(--muted);font-style:italic}
 .tmeta{font-size:11px;color:var(--faint);font-family:"IBM Plex Mono",monospace;margin-top:3px}
 .empty-state{color:var(--faint);font-size:13px;padding:8px 0}
+.replyhint{margin-top:5px;font-size:12px;color:var(--accent);line-height:1.45}
 
 /* ---- comparison ---- */
 .cmp{display:grid;grid-template-columns:1fr 1fr;gap:16px}
@@ -492,7 +497,8 @@ const S = {
   needSpan:"eine markierte Stelle im Text", needLens:"eine Antwort auf Frage {n}", needChars:"noch {n} Zeichen Begründung",
   stateNew:"neu", stateSaved:"gespeichert", stateRev:"Fassung",
   dlgEmpty:"Noch keine Rückmeldung. Speichere eine Annotation oder stelle eine Rückfrage.",
-  types:{evidence:"Beleg gesucht",contrast:"Kontrast",reframe:"Neu gerahmt",ack:"Weitergefragt",learner:"Du"},
+  types:{evidence:"Beleg gesucht",contrast:"Kontrast",reframe:"Neu gerahmt",ack:"Weitergefragt",meta:"Zurück zur Lesart",learner:"Du"},
+  replyHint:"Zum Antworten: schreibe deine Begründung mit dieser Frage im Kopf neu und speichere erneut.",
   cmpH:"Vergleich", cmpSub:"Der Vergleich öffnet sich, sobald du Passagen aus zwei Ländern annotiert hast — deine eigenen Lesarten stehen dann nebeneinander.",
   cmpLocked:"Noch gesperrt. Annotiere je eine Passage aus zwei verschiedenen Ländern.",
   cmpLockedOne:"{done} hast du schon annotiert. Nimm jetzt eine Passage aus einem anderen Land: {rest}.",
@@ -518,6 +524,7 @@ const S = {
    evidence:q=>`Welche Wörter in „${q}“ führen dich zu dieser Lesart? Zitiere die Stelle, an der du es festmachst.`,
    reframe:q=>`Hier spricht ein Text, nicht ein Land. Welche Formulierung in „${q}“ trägt diese Aussage?`,
    contrast:(q,o)=>`Du hast ${o} schon annotiert. Wo sagt „${q}“ etwas anderes über dieselbe Sache?`,
+   meta:q=>`Nicht warum du diese Stelle gewählt hast, sondern was ihre Wörter mit Familie machen. Welche Formulierung in „${q}“ tut das?`,
    ack:[q=>`Und was gilt an dieser Stelle als Ursache des Problems?`,
         q=>`Wer sorgt in diesem Bild für wen — und wer wird nicht genannt?`,
         q=>`Trüge die Begründung auch ohne das Wort, das du markiert hast?`]
@@ -560,7 +567,8 @@ const S = {
   needSpan:"metinde seçili bir yer", needLens:"{n}. sorunun yanıtı", needChars:"{n} karakter daha gerekçe",
   stateNew:"yeni", stateSaved:"kaydedildi", stateRev:"sürüm",
   dlgEmpty:"Henüz geri bildirim yok. Bir açıklama kaydedin ya da soru sorun.",
-  types:{evidence:"Kanıt istendi",contrast:"Karşıtlık",reframe:"Yeniden çerçeveleme",ack:"Derinleştirme",learner:"Siz"},
+  types:{evidence:"Kanıt istendi",contrast:"Karşıtlık",reframe:"Yeniden çerçeveleme",ack:"Derinleştirme",meta:"Okumaya dönün",learner:"Siz"},
+  replyHint:"Yanıtlamak için gerekçenizi bu soruyu düşünerek yeniden yazın ve tekrar kaydedin.",
   cmpH:"Karşılaştırma", cmpSub:"İki farklı ülkeden pasaj açıkladığınızda karşılaştırma açılır — kendi okumalarınız yan yana gelir.",
   cmpLocked:"Henüz kilitli. İki farklı ülkeden birer pasaj açıklayın.",
   cmpLockedOne:"{done} pasajını açıkladınız. Şimdi başka bir ülkenin pasajını açıklayın: {rest}.",
@@ -586,6 +594,7 @@ const S = {
    evidence:q=>`„${q}“ içindeki hangi sözcükler sizi bu okumaya götürüyor? Dayandığınız yeri alıntılayın.`,
    reframe:q=>`Burada bir ülke değil, bir metin konuşuyor. „${q}“ içindeki hangi ifade bu yargıyı taşıyor?`,
    contrast:(q,o)=>`${o} pasajını zaten açıkladınız. „${q}“ aynı konuda nerede başka bir şey söylüyor?`,
+   meta:q=>`Bu bölümü neden seçtiğinizi değil, bu sözcüklerin aileyi nasıl gösterdiğini yazın. „${q}“ içindeki hangi ifade bunu yapıyor?`,
    ack:[q=>`Peki bu bölümde sorunun nedeni olarak ne gösteriliyor?`,
         q=>`Bu tabloda kim kimin bakımını üstleniyor — ve kim anılmıyor?`,
         q=>`Seçtiğiniz sözcük olmasaydı gerekçe yine ayakta kalır mıydı?`]
@@ -628,7 +637,8 @@ const S = {
   needSpan:"a selected stretch of text", needLens:"an answer to question {n}", needChars:"{n} more characters of justification",
   stateNew:"new", stateSaved:"saved", stateRev:"version",
   dlgEmpty:"No feedback yet. Save an annotation or ask a question.",
-  types:{evidence:"Evidence requested",contrast:"Contrast",reframe:"Reframed",ack:"Pressed further",learner:"You"},
+  types:{evidence:"Evidence requested",contrast:"Contrast",reframe:"Reframed",ack:"Pressed further",meta:"Back to the reading",learner:"You"},
+  replyHint:"To answer: rewrite your justification with this question in mind and save again.",
   cmpH:"Compare", cmpSub:"Comparison unlocks once you have annotated passages from two countries — your own readings then sit side by side.",
   cmpLocked:"Still locked. Annotate one passage from each of two different countries.",
   cmpLockedOne:"You have annotated {done}. Now take a passage from another country: {rest}.",
@@ -654,6 +664,7 @@ const S = {
    evidence:q=>`Which words in “${q}” lead you to this reading? Quote the place you anchor it in.`,
    reframe:q=>`A text is speaking here, not a country. Which wording in “${q}” carries that claim?`,
    contrast:(q,o)=>`You have already annotated ${o}. Where does “${q}” say something different about the same thing?`,
+   meta:q=>`Not why you picked this passage, but what its words do to the idea of family. Which wording in “${q}” does that?`,
    ack:[q=>`And what counts here as the cause of the problem?`,
         q=>`Who cares for whom in this picture — and who goes unnamed?`,
         q=>`Would the justification still stand without the word you selected?`]
@@ -719,6 +730,10 @@ const ACTOR=/(?:^|[^\p{L}])(staat|land|regierung|politik|system|ülke|devlet|hü
 const REPORT=/(im text steht|hier heißt es|dort steht|es heißt|danach folgt|das ist der inhalt|metinde|yazıyor)/iu;
 const INTERPRET=/(?:^|[^\p{L}])(weil|deshalb|dadurch|sodass|das heißt|dargestellt|macht|zeigt|bedeutet|wirkt|çünkü|demek)\p{L}*/iu;
 
+/* v3 trigger: a defence of the choice of passage is not a reading of it. */
+const META_OBJ=/(bölüm|kısım|pasaj|cümle|ifade|metn|abschnitt|stelle|passage|satz|section|sentence)/iu;
+const META_PRED=/(seçtim|seçtiğim|seçme|tercih|barındı|içerdiğ|kapsadığ|yeterli|yetec|uygun oldu|gewählt|ausgesucht|am besten passt|passt am besten|chose|selected|best fits)/iu;
+
 const STOP=new Set("der die das den dem des und oder ein eine einer für von mit auch als ist sind wird werden nicht bei aus auf zu im in an um über nach vor ve ile bir bu şu da de için gibi olarak ancak ise the of and to a in is are".split(" "));
 
 function tokens(s){return (s.toLowerCase().match(/[\p{L}\p{N}]{4,}/gu)||[]).filter(w=>!STOP.has(w));}
@@ -738,6 +753,7 @@ function respond(kind){
   const ownShare=own.length?own.filter(w=>!spanSet.has(w)).length/own.length:1;
   if(ESSENTIALISE.test(just)){ type="reframe"; text=t().fb.reframe(q); }
   else if(EVALUATIVE.test(just) && ACTOR.test(just)){ type="reframe"; text=t().fb.reframe(q); }
+  else if(just.length>0 && META_OBJ.test(just) && META_PRED.test(just)){ type="meta"; text=t().fb.meta(q); }
   else if(overlap(just,span)===0 && just.length>0){ type="evidence"; text=t().fb.evidence(q); }
   else if(just.length>0 && REPORT.test(just) && !INTERPRET.test(just)){ type="evidence"; text=t().fb.evidence(q); }
   else if(just.length>0 && ownShare<0.45){ type="evidence"; text=t().fb.evidence(q); }
@@ -853,11 +869,13 @@ function renderDoc(){
 function renderTurns(){
   const box=document.getElementById("turns"), s=t();
   if(!state.turns.length){box.innerHTML=`<div class="empty-state">${s.dlgEmpty}</div>`;return;}
-  box.innerHTML=state.turns.map(x=>{
+  const newestSystem=state.turns.findIndex(x=>x.role==="system");
+  box.innerHTML=state.turns.map((x,i)=>{
     const cls=x.role==="learner"?"t-learner":"t-"+x.type;
     const label=x.role==="learner"?s.types.learner:s.types[x.type];
+    const hint=(i===newestSystem)?`<div class="replyhint">${escapeHtml(s.replyHint)}</div>`:"";
     return `<div class="turn ${cls}"><div class="tick"></div><div>
-      <div class="ttype">${label}</div><div class="tbody">${escapeHtml(x.text)}</div>
+      <div class="ttype">${label}</div><div class="tbody">${escapeHtml(x.text)}</div>${hint}
       <div class="tmeta">${x.time}${x.role==="learner"?"":" · "+x.type}</div></div></div>`;
   }).join("");
 }
