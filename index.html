@@ -282,8 +282,8 @@ footer{margin-top:26px;padding-top:14px;border-top:1px solid var(--line);font-si
 <nav class="tabs" role="tablist">
   <button role="tab" id="tab-work" aria-selected="true">Arbeiten</button>
   <button role="tab" id="tab-cmp" aria-selected="false">Vergleich<span class="count" id="cmp-count">0/2</span></button>
-  <button role="tab" id="tab-mat" aria-selected="false">Materialien<span class="count" id="mat-count">0</span></button>
-  <button role="tab" id="tab-log" aria-selected="false">Protokoll<span class="count" id="log-count">0</span></button>
+  <button role="tab" id="tab-mat" aria-selected="false" class="hidden">Materialien<span class="count" id="mat-count">0</span></button>
+  <button role="tab" id="tab-log" aria-selected="false" class="hidden">Protokoll<span class="count" id="log-count">0</span></button>
   <button role="tab" id="tab-ev" aria-selected="false">Bewertung<span class="count" id="ev-count">0/29</span></button>
 </nav>
 
@@ -358,6 +358,7 @@ footer{margin-top:26px;padding-top:14px;border-top:1px solid var(--line);font-si
         <div class="lens">
           <h3 id="just-h">Begründung</h3>
           <p class="q" id="just-q"></p>
+          <p class="q" id="just-lang" style="color:var(--accent)"></p>
           <textarea id="just" placeholder=""></textarea>
           <div class="meter" id="meter"><span id="meter-txt"></span><span id="meter-n">0</span></div>
           <div class="need" id="need"></div>
@@ -420,7 +421,6 @@ footer{margin-top:26px;padding-top:14px;border-top:1px solid var(--line);font-si
       <div class="tablewrap"><table><thead><tr id="log-head"></tr></thead><tbody id="log-body"></tbody></table></div>
       <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap">
         <button class="btn primary" id="export">Meine Arbeit herunterladen</button>
-        <button class="btn ghost" id="clearall">Sitzung löschen</button>
         <span id="export-msg" style="font-size:12px;color:var(--muted);align-self:center"></span>
       </div>
     </div></div>
@@ -461,15 +461,16 @@ const S = {
   notice:'Die Rückmeldungsebene ist hier regelbasiert nachgebildet (Wizard-of-Oz): Sie folgt exakt dem Prompt-Vertrag der Studie — kein Urteil, ein Beleg, eine Frage — ruft aber kein Sprachmodell auf. Alle Exzerpte sind vollständige Originalpassagen aus den vier Quelldokumenten. Eigene Passagen lassen sich unter <b>Materialien</b> laden.',
   lText:"Text", lLens:"Linsen", lSel:"Markierte Stelle", lDlg:"Rückmeldung",
   selEmpty:"Markiere zuerst eine Stelle im Text.",
-  hint:"Markiere mit der Maus eine Stelle im Text — ein Satzteil genügt. Beantworte dann die drei Fragen und begründe deine Lesart am Wortlaut.",
-  justH:"Begründung", justQ:"Schreib, warum genau die Wörter, die du markiert hast, dich zu dieser Lesart führen — nicht was dort steht, sondern was diese Formulierung tut.",
+  hint:"Markiere mit der Maus einen Abschnitt in diesem Text — ein Satzteil genügt. Beantworte dann rechts die drei Fragen und begründe deine Lesart am Wortlaut.",
+  justH:"Begründung", justQ:"Welche Wörter des markierten Abschnitts führen dich zu dieser Lesart? Zitiere sie und schreibe, wie Familie an dieser Stelle dargestellt wird.",
+  justLang:"Sprache frei — Deutsch oder Erstsprache. Wichtig ist nur, dass du die Stelle, auf die du dich stützt, wörtlich aus dem Text zitierst.",
   justPh:"Weil der Text an dieser Stelle …",
   meter:"mindestens 80 Zeichen", save:"Speichern", ask:"Rückfrage", reset:"Zurücksetzen",
   gStep:"Schritt {n} von {total}", gDone:"Fertig", gGo:"Dorthin",
   gFinishT:"Alles erledigt — vielen Dank.",
   gFinishX:"Lade jetzt deine Arbeit herunter und schicke die Datei mit. Sie enthält deine Annotationen und deine Bewertung.",
   gSteps:[
-   ["Eine Stelle annotieren","Wähle eine Passage, markiere darin eine Stelle, beantworte die drei Fragen und begründe deine Lesart. Dann speichern."],
+   ["Eine Stelle annotieren","Öffne über die Länder-Schaltflächen im Textfeld eine Passage, markiere darin einen Abschnitt, beantworte die drei Fragen und begründe deine Lesart. Dann speichern."],
    ["Die Begründung überarbeiten","Lies die Rückmeldung und schreibe die Begründung neu — diesmal am Wortlaut der markierten Stelle. Erneut speichern."],
    ["Eine Verallgemeinerung ausprobieren","Schreibe absichtlich einen Satz, der vom Text auf ein Volk schließt (z. B. „Die Türken denken immer so“) und speichere. Beobachte, was das System tut."],
    ["Ein zweites Land annotieren","Wechsle oben zu einer Passage aus einem anderen Land und annotiere dort eine Stelle."],
@@ -477,7 +478,7 @@ const S = {
    ["Den Bewertungsbogen ausfüllen","Öffne den Reiter Bewertung: 17 Skalenfragen und vier Lernersätze. Die offenen Fragen sind willkommen, aber nicht Pflicht."]
   ],
   howH:"Wie diese Werkstatt funktioniert",
-  howSteps:["Wähle oben eine Passage und markiere darin mit der Maus eine Stelle — ein Satzteil genügt.",
+  howSteps:["Öffne über die Länder-Schaltflächen im Textfeld eine Passage und markiere darin mit der Maus einen Abschnitt — ein Satzteil genügt.",
             "Beantworte die drei Fragen rechts. Es gibt keine versteckte Musterlösung.",
             "Begründe deine Lesart am Wortlaut: Warum führen genau diese Wörter dich dorthin?",
             "Speichern. Die Rückmeldung gibt dir keine Antwort, sondern eine Frage — überarbeite und speichere erneut.",
@@ -528,15 +529,16 @@ const S = {
   notice:'Geri bildirim katmanı burada kural tabanlı olarak canlandırılmıştır (Wizard-of-Oz): Çalışmanın prompt sözleşmesini birebir izler — yargı yok, bir kanıt, bir soru — ama bir dil modeli çağırmaz. Bütün alıntılar dört kaynak belgeden alınmış tam pasajlardır. Kendi pasajlarınızı <b>Materyaller</b> sekmesinden yükleyebilirsiniz.',
   lText:"Metin", lLens:"Mercekler", lSel:"Seçili yer", lDlg:"Geri bildirim",
   selEmpty:"Önce metinde bir yer seçin.",
-  hint:"Metinde fareyle bir yer seçin — bir cümle parçası yeter. Sonra üç soruyu yanıtlayın ve okumanızı metnin sözcüklerine dayandırın.",
-  justH:"Gerekçe", justQ:"Seçtiğiniz sözcüklerin sizi neden bu okumaya götürdüğünü yazın — metinde ne yazdığını değil, o ifadenin ne yaptığını.",
+  hint:"Bu metinde fareyle bir bölüm işaretleyin — bir cümle parçası yeter. Sonra sağdaki üç soruyu yanıtlayın ve okumanızı metnin sözcüklerine dayandırın.",
+  justH:"Gerekçe", justQ:"İşaretlediğiniz bölümün hangi sözcükleri sizi bu okumaya götürdü? O sözcükleri alıntılayın ve ailenin burada nasıl gösterildiğini yazın.",
+  justLang:"Dil serbest — Almanca ya da Türkçe. Önemli olan tek şey: dayandığınız ifadeyi metinden birebir alıntılamanız.",
   justPh:"Çünkü metin burada …",
   meter:"en az 80 karakter", save:"Kaydet", ask:"Soru sor", reset:"Temizle",
   gStep:"Adım {n} / {total}", gDone:"Tamamlandı", gGo:"Oraya git",
   gFinishT:"Her şey tamam — teşekkür ederim.",
   gFinishX:"Şimdi çalışmanızı indirip dosyayı gönderin. İçinde hem açıklamalarınız hem değerlendirmeniz var.",
   gSteps:[
-   ["Bir yeri açıklayın","Bir pasaj seçin, içinde bir yer işaretleyin, üç soruyu yanıtlayın ve okumanızı gerekçelendirin. Sonra kaydedin."],
+   ["Bir bölümü açıklayın","Metin alanındaki ülke düğmelerinden bir pasaj açın, içinde bir bölüm işaretleyin, üç soruyu yanıtlayın ve okumanızı gerekçelendirin. Sonra kaydedin."],
    ["Gerekçeyi düzeltin","Gelen geri bildirimi okuyun ve gerekçeyi yeniden yazın — bu kez seçtiğiniz sözcüklere dayandırarak. Tekrar kaydedin."],
    ["Bir genelleme deneyin","Bilerek metinden bir halka genelleme yapan bir cümle yazın (örn. „Türkler hep böyle düşünür“) ve kaydedin. Sistemin ne yaptığını gözleyin."],
    ["İkinci bir ülkeyi açıklayın","Yukarıdan başka bir ülkenin pasajına geçin ve orada da bir yeri açıklayın."],
@@ -544,7 +546,7 @@ const S = {
    ["Değerlendirme formunu doldurun","Değerlendirme sekmesini açın: 17 ölçekli madde ve dört öğrenci cümlesi. Açık uçlu sorular zorunlu değil ama çok işime yarar."]
   ],
   howH:"Bu atölye nasıl çalışıyor",
-  howSteps:["Yukarıdan bir pasaj seçin ve içinde fareyle bir yer işaretleyin — bir cümle parçası yeter.",
+  howSteps:["Metin alanındaki ülke düğmelerinden bir pasaj açın ve metin içinde fareyle bir bölüm işaretleyin — bir cümle parçası yeter.",
             "Sağdaki üç soruyu yanıtlayın. Gizli bir doğru cevap yok.",
             "Okumanızı metnin sözcüklerine dayandırın: tam olarak bu sözcükler sizi neden oraya götürüyor?",
             "Kaydedin. Geri bildirim size cevap değil soru verir — düzeltip yeniden kaydedin.",
@@ -595,15 +597,16 @@ const S = {
   notice:'The feedback layer is reproduced here by rule (Wizard-of-Oz): it follows the study\'s prompt contract exactly — no verdict, one piece of evidence, one question — but calls no language model. All excerpts are full original passages from the four source documents; load your own under <b>Materials</b>.',
   lText:"Text", lLens:"Lenses", lSel:"Selected passage", lDlg:"Feedback",
   selEmpty:"Select a stretch of the text first.",
-  hint:"Select a stretch of text with the mouse — a clause is enough. Then answer the three questions and anchor your reading in the wording.",
-  justH:"Justification", justQ:"Write why the words you selected lead you to this reading — not what the text says, but what that wording does.",
+  hint:"Select a stretch of this text with the mouse — a clause is enough. Then answer the three questions on the right and anchor your reading in the wording.",
+  justH:"Justification", justQ:"Which words of the passage you marked lead you to this reading? Quote them and write how the family is pictured there.",
+  justLang:"Any language — German or your first language. What matters is that you quote, word for word, the wording you rely on.",
   justPh:"Because the text here …",
   meter:"at least 80 characters", save:"Save", ask:"Ask", reset:"Clear",
   gStep:"Step {n} of {total}", gDone:"Done", gGo:"Go there",
   gFinishT:"All done — thank you.",
   gFinishX:"Now download your work and send the file along. It contains both your annotations and your ratings.",
   gSteps:[
-   ["Annotate one passage","Pick a passage, select a stretch of it, answer the three questions and justify your reading. Then save."],
+   ["Annotate one passage","Open a passage with the country buttons in the text pane, select a stretch of it, answer the three questions and justify your reading. Then save."],
    ["Revise the justification","Read the response and rewrite the justification — this time anchored in the words you selected. Save again."],
    ["Try a generalisation","Deliberately write a sentence that generalises from the text to a people (e.g. \"Turks always think this way\") and save. Watch what the system does."],
    ["Annotate a second country","Switch to a passage from another country above and annotate a stretch there."],
@@ -611,7 +614,7 @@ const S = {
    ["Fill in the evaluation","Open the Evaluation tab: 17 scale items and four learner sentences. The open questions are welcome but not required."]
   ],
   howH:"How this workshop works",
-  howSteps:["Pick a passage above and select a stretch of it with the mouse — a clause is enough.",
+  howSteps:["Open a passage with the country buttons in the text pane, then select a stretch of it with the mouse — a clause is enough.",
             "Answer the three questions on the right. There is no hidden model answer.",
             "Anchor your reading in the wording: why do these particular words lead you there?",
             "Save. The response gives you a question, not an answer — revise and save again.",
@@ -775,6 +778,7 @@ function renderChrome(){
   document.getElementById("hint").textContent=s.hint;
   document.getElementById("just-h").textContent=s.justH;
   document.getElementById("just-q").textContent=s.justQ;
+  document.getElementById("just-lang").textContent=s.justLang;
   document.getElementById("just").placeholder=s.justPh;
   document.getElementById("meter-txt").textContent=s.meter;
   document.getElementById("save").textContent=s.save;
@@ -796,7 +800,6 @@ function renderChrome(){
   document.getElementById("log-h").textContent=s.logH;
   document.getElementById("log-sub").textContent=s.logSub;
   document.getElementById("export").textContent=s.export;
-  document.getElementById("clearall").textContent=s.clear;
   document.getElementById("foot").textContent=s.foot;
   document.getElementById("log-head").innerHTML=s.head.map(h=>`<th>${h}</th>`).join("");
   document.getElementById("how-h").textContent=s.howH;
@@ -988,11 +991,6 @@ document.getElementById("m-add").addEventListener("click",()=>{
   save(); renderMat(); renderPicker(); renderCounts(); logEvent("material-added",{});
 });
 
-document.getElementById("clearall").addEventListener("click",()=>{
-  state={excerpts:SEEDS.slice(),current:SEEDS[0].id,ann:{},log:[],turns:[],eval:{},flags:{}};
-  save(); resetDraft(); renderPicker(); renderDoc(); renderTurns(); renderMat(); renderLog(); renderCmp(); renderCounts();
-});
-
 async function downloadWork(msgId){
   const payload=JSON.stringify({
     version:"kulturskript-werkstatt v5",
@@ -1031,7 +1029,8 @@ const EV_GROUPS=[
   items:[["A1","Ortam, kültürel çerçevelemeyi öğrenci için fark edilebilir kılıyor."],
          ["A2","Görev, ülke hakkında bilgi hatırlamayı değil, metni yorumlamayı gerektiriyor."],
          ["A3","Gerekçe alanı, öğrencinin izlenimden kanıta geçmesini sağlıyor."],
-         ["A4","Görev, Byram'ın eleştirel kültür bilinci hedefine hizmet ediyor."]]},
+         ["A4","Görev, Byram'ın eleştirel kültür bilinci hedefine hizmet ediyor."],
+         ["A5","Karşılaştırma görünümü, iki okumayı yan yana koyarak kültürel farkı görünür kılıyor."]]},
  {h:"B · Merceklerin anlaşılırlığı", d:"Üç sorunun ve seçeneklerin öğrenci için ulaşılabilirliği.",
   items:[["B1","Üç mercek sorusu B2–C1 düzeyindeki bir öğrenci için anlaşılır."],
          ["B2","Seçenek kümeleri, aralarında hiyerarşi sezdirmeden sunulmuş."],
@@ -1046,8 +1045,7 @@ const EV_GROUPS=[
  {h:"D · Derse entegre edilebilirlik", d:"Kendi ders bağlamınızı düşünerek.",
   items:[["D1","Bu ortamı kendi dersimde kullanabilirim."],
          ["D2","Bir ders saati (45 dk) içinde anlamlı bir çalışma yapılabilir."],
-         ["D3","Ortam, öğretmene sınıfta ek yük getirmiyor."],
-         ["D4","Kayıt sekmesindeki veriler, öğrenci gelişimini izlemek için kullanışlı."]]}
+         ["D3","Ortam, öğretmene sınıfta ek yük getirmiyor."]]}
 ];
 const EV_OPEN=[
  ["S1","Öğrencilerinizin bu görevde en çok nerede zorlanacağını düşünüyorsunuz?"],
@@ -1156,7 +1154,7 @@ function renderGuide(){
     document.getElementById("g-title").textContent=s.gFinishT;
     document.getElementById("g-text").textContent=s.gFinishX;
     go.textContent=s.export;
-    go.onclick=()=>{ switchTab("log"); downloadWork("export-msg"); };
+    go.onclick=()=>{ switchTab("ev"); downloadWork("ev-msg"); };
   }else{
     g.className="guide";
     document.getElementById("g-step").textContent=
@@ -1198,6 +1196,10 @@ function setLang(l){
 
 /* boot */
 load();
+try{ if(/[?&]admin=1/.test(location.search)){
+  document.getElementById("tab-mat").classList.remove("hidden");
+  document.getElementById("tab-log").classList.remove("hidden");
+} }catch(e){}
 try{ if(!localStorage.getItem("kw.seen.how")){ document.getElementById("how").open=true;
      localStorage.setItem("kw.seen.how","1"); } }catch(e){ document.getElementById("how").open=true; }
 renderChrome(); renderLenses(); renderPicker(); renderDoc(); resetDraft();
