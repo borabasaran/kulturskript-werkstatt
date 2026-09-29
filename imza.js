@@ -1,9 +1,9 @@
 // Kulturskript Werkstatt: sürüm imzası. Görünür bir değişiklik yayınlandığında SURUM'u artırın;
-// sayfaların altında "© 2026 Kulturskript Werkstatt v5.0 by bbasaran" olarak görünür.
+// sayfaların altında "© 2026 Kulturskript Werkstatt v5.1 by bbasaran.net" olarak görünür.
 (function () {
   var AD = 'Kulturskript Werkstatt';
-  var SURUM = '5.0';
-  var YAZAR = 'bbasaran';
+  var SURUM = '5.1';
+  var YAZAR = 'bbasaran.net';
   var YAZAR_URL = 'https://bbasaran.net';
 
   function ekle() {
