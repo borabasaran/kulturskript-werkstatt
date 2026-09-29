@@ -1020,10 +1020,6 @@ async function downloadWork(msgId){
   const msg=document.getElementById(msgId);
   const name="kulturskript-arbeit.json";
   try{
-    const d=await window.claude?.use?.("downloads");
-    if(d){ await d.save({filename:name,data:payload}); msg.textContent=t().exported; return; }
-  }catch(e){}
-  try{
     const blob=new Blob([payload],{type:"application/json"});
     const url=URL.createObjectURL(blob);
     const a=document.createElement("a");
